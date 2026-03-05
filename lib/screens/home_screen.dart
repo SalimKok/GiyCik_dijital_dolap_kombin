@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gircik/screens/wardrobe_screen.dart';
+import 'package:gircik/screens/style_calendar_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -120,7 +121,13 @@ class HomeScreen extends StatelessWidget {
         icon: Icons.calendar_month_rounded,
         title: 'Stil Takvimi',
         subtitle: 'Etkinlikler için planla',
-        onTap: () {},
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const StyleCalendarScreen(),
+            ),
+          );
+        },
       ),
       _QuickAction(
         icon: Icons.local_laundry_service_rounded,
