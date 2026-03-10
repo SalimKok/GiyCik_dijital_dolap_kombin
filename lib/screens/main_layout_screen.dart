@@ -3,6 +3,7 @@ import 'package:gircik/screens/home_screen.dart';
 import 'package:gircik/screens/wardrobe_screen.dart';
 import 'package:gircik/screens/outfit_recommendation_screen.dart';
 import 'package:gircik/screens/style_calendar_screen.dart';
+import 'package:gircik/screens/laundry_screen.dart';
 
 class MainLayoutScreen extends StatefulWidget {
   const MainLayoutScreen({super.key});
@@ -19,7 +20,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
     const WardrobeScreen(),
     const OutfitRecommendationScreen(),
     const StyleCalendarScreen(),
-    const PlaceholderScreen(title: 'Yıkama & Hijyen'), // Placeholder for laundry
+    const LaundryScreen(),
   ];
 
   @override
@@ -63,32 +64,6 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
             label: 'Hijyen',
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Placeholder screen for the 5th tab
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const PlaceholderScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.construction_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              '$title ekranı yakında burada olacak.',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
-        ),
       ),
     );
   }
