@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gircik/screens/wardrobe_screen.dart';
 import 'package:gircik/screens/style_calendar_screen.dart';
+import 'package:gircik/screens/outfit_recommendation_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -115,7 +116,13 @@ class HomeScreen extends StatelessWidget {
         icon: Icons.auto_awesome_rounded,
         title: 'Kombin Önerisi',
         subtitle: 'Yapay zeka ile öneri al',
-        onTap: () {},
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const OutfitRecommendationScreen(),
+            ),
+          );
+        },
       ),
       _QuickAction(
         icon: Icons.calendar_month_rounded,
