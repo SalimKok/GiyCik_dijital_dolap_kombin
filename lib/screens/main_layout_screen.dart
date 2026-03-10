@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gircik/screens/home_screen.dart';
 import 'package:gircik/screens/wardrobe_screen.dart';
-import 'package:gircik/screens/outfit_recommendation_screen.dart';
+import 'package:gircik/screens/outfits_screen.dart';
 import 'package:gircik/screens/style_calendar_screen.dart';
 import 'package:gircik/screens/laundry_screen.dart';
 
@@ -18,7 +18,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const WardrobeScreen(),
-    const OutfitRecommendationScreen(),
+    const OutfitsScreen(),
     const StyleCalendarScreen(),
     const LaundryScreen(),
   ];
