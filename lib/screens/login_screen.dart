@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gircik/screens/register_screen.dart';
-import 'package:gircik/screens/home_screen.dart';
+import 'package:gircik/screens/main_layout_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Giriş ekranı: e-posta ve şifre ile giriş, kayıt sayfasına geçiş.
@@ -87,7 +87,7 @@ class _LoginBodyState extends State<_LoginBody> {
     widget.onLoginSuccess();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
     );
   }
 
@@ -100,7 +100,7 @@ class _LoginBodyState extends State<_LoginBody> {
             widget.onLoginSuccess();
             if (!context.mounted) return;
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+              MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
             );
           },
         ),

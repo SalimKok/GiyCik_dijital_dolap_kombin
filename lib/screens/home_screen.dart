@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gircik/screens/wardrobe_screen.dart';
-import 'package:gircik/screens/style_calendar_screen.dart';
-import 'package:gircik/screens/outfit_recommendation_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -18,9 +15,13 @@ class HomeScreen extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   _buildWelcomeSection(context),
                   const SizedBox(height: 28),
-                  _buildSectionTitle(context, 'Hızlı Erişim'),
+                  _buildSectionTitle(context, 'Yaklaşan Önemli Bilgiler'),
                   const SizedBox(height: 12),
-                  _buildQuickActions(context),
+                  _buildUpcomingInfo(context),
+                  const SizedBox(height: 28),
+                  _buildSectionTitle(context, 'Favori Kombinler'),
+                  const SizedBox(height: 12),
+                  _buildFavoriteOutfits(context),
                   const SizedBox(height: 28),
                   _buildSectionTitle(context, 'Bugün'),
                   const SizedBox(height: 12),
@@ -98,69 +99,90 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    final actions = [
-      _QuickAction(
-        icon: Icons.checkroom_rounded,
-        title: 'Gardırop',
-        subtitle: 'Kıyafetlerini yönet',
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const WardrobeScreen(),
-            ),
-          );
-        },
-      ),
-      _QuickAction(
-        icon: Icons.auto_awesome_rounded,
-        title: 'Kombin Önerisi',
-        subtitle: 'Yapay zeka ile öneri al',
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const OutfitRecommendationScreen(),
-            ),
-          );
-        },
-      ),
-      _QuickAction(
-        icon: Icons.calendar_month_rounded,
-        title: 'Stil Takvimi',
-        subtitle: 'Etkinlikler için planla',
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const StyleCalendarScreen(),
-            ),
-          );
-        },
-      ),
-      _QuickAction(
-        icon: Icons.local_laundry_service_rounded,
-        title: 'Yıkama Uyarıları',
-        subtitle: 'Hijyen takibi',
-        onTap: () {},
-      ),
-    ];
+  Widget _buildUpcomingInfo(BuildContext context) {
+    return Column(
+      children: [
+        _InfoCard(
+          icon: Icons.local_laundry_service_rounded,
+          title: 'Yıkanması Gerekenler',
+          subtitle: '3 kıyafetin yıkanma vakti geldi.',
+          color: Colors.blue,
+          onTap: () {},
+        ),
+        const SizedBox(height: 12),
+        _InfoCard(
+          icon: Icons.event_rounded,
+          title: 'Yaklaşan Etkinlik',
+          subtitle: 'Yarın akşam: İş Yemeği',
+          color: Colors.orange,
+          onTap: () {},
+        ),
+      ],
+    );
+  }
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.05,
-      children: actions
-          .map(
-            (a) => _QuickActionCard(
-              icon: a.icon,
-              title: a.title,
-              subtitle: a.subtitle,
-              onTap: a.onTap,
+  Widget _buildFavoriteOutfits(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: 3,
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          return Container(
+            width: 140,
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+              ),
             ),
-          )
-          .toList(),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.checkroom_rounded,
+                              size: 40,
+                              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Kombin ${index + 1}',
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Casual',
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -228,30 +250,18 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _QuickAction {
+class _InfoCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final Color color;
   final VoidCallback onTap;
 
-  _QuickAction({
+  const _InfoCard({
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.onTap,
-  });
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _QuickActionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.color,
     required this.onTap,
   });
 
@@ -260,39 +270,48 @@ class _QuickActionCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       color: theme.cardTheme.color,
-      shape: theme.cardTheme.shape as RoundedRectangleBorder,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: theme.colorScheme.primary, size: 22),
+                child: Icon(icon, color: color),
               ),
-              const Spacer(),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(fontSize: 15),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -301,3 +320,4 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
+

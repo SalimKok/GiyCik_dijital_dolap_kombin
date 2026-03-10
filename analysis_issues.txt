@@ -1,0 +1,2 @@
+[warning] Unused import: 'package:gircik/screens/home_screen.dart' (C:\FlutterOrnekler\gircik\lib\core\app_start_screen.dart:3:8)
+[warning] The value of the local variable 'theme' isn't used (C:\FlutterOrnekler\gircik\lib\screens\main_layout_screen.dart:27:11)

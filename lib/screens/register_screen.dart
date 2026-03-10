@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gircik/screens/home_screen.dart';
+import 'package:gircik/screens/main_layout_screen.dart';
 
 /// Kayıt ekranı: ad, e-posta ve şifre ile yeni hesap oluşturma.
 class RegisterScreen extends StatelessWidget {
@@ -55,7 +55,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
     widget.onRegisterSuccess();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
       (route) => false,
     );
   }

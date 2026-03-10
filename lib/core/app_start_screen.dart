@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gircik/screens/home_screen.dart';
+import 'package:gircik/screens/main_layout_screen.dart';
 import 'package:gircik/screens/login_screen.dart';
 import 'package:gircik/screens/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +88,6 @@ class _AppStartScreenState extends State<AppStartScreen> {
       );
     }
 
-    return const HomeScreen();
+    return const MainLayoutScreen();
   }
 }
