@@ -1,72 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gircik/data/models/laundry_item.dart';
+import 'package:gircik/features/laundry/viewmodel/laundry_viewmodel.dart';
 
-class LaundryScreen extends StatefulWidget {
+class LaundryScreen extends ConsumerStatefulWidget {
   const LaundryScreen({super.key});
 
   @override
-  State<LaundryScreen> createState() => _LaundryScreenState();
+  ConsumerState<LaundryScreen> createState() => _LaundryScreenState();
 }
 
-class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProviderStateMixin {
+class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  // Mock Data definitions
-  final List<Map<String, dynamic>> _needsWash = [
-    {
-      'id': '1',
-      'name': 'Beyaz Keten Gömlek',
-      'category': 'Üst Giyim',
-      'wearCount': 3,
-      'maxWear': 3,
-      'icon': Icons.dry_cleaning_rounded,
-    },
-    {
-      'id': '2',
-      'name': 'Siyah Kot Pantolon',
-      'category': 'Alt Giyim',
-      'wearCount': 5,
-      'maxWear': 5,
-      'icon': Icons.airline_seat_legroom_normal_rounded,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _washing = [
-    {
-      'id': '3',
-      'name': 'Spor Tişört',
-      'category': 'Üst Giyim',
-      'wearCount': 1,
-      'maxWear': 1,
-      'icon': Icons.dry_cleaning_rounded,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _clean = [
-    {
-      'id': '4',
-      'name': 'Açık Mavi Gömlek',
-      'category': 'Üst Giyim',
-      'wearCount': 0,
-      'maxWear': 3,
-      'icon': Icons.dry_cleaning_rounded,
-    },
-    {
-      'id': '5',
-      'name': 'Gri Eşofman',
-      'category': 'Alt Giyim',
-      'wearCount': 0,
-      'maxWear': 2,
-      'icon': Icons.airline_seat_legroom_normal_rounded,
-    },
-    {
-      'id': '6',
-      'name': 'Bordo Kazak',
-      'category': 'Üst Giyim',
-      'wearCount': 1,
-      'maxWear': 4,
-      'icon': Icons.dry_cleaning_rounded,
-    },
-  ];
 
   @override
   void initState() {
@@ -80,41 +25,17 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  void _moveToWashing(Map<String, dynamic> item) {
-    setState(() {
-      _needsWash.removeWhere((element) => element['id'] == item['id']);
-      _washing.add(item);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['name']} yıkamaya eklendi')),
-    );
-  }
-
-  void _moveToClean(Map<String, dynamic> item) {
-    setState(() {
-      _washing.removeWhere((element) => element['id'] == item['id']);
-      item['wearCount'] = 0; // Reset wear count
-      _clean.add(item);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['name']} temiz olarak işaretlendi')),
-    );
-  }
-
-  void _moveToNeedsWash(Map<String, dynamic> item) {
-    setState(() {
-      _clean.removeWhere((element) => element['id'] == item['id']);
-      item['wearCount'] = item['maxWear']; // Max out wear count for demo
-      _needsWash.add(item);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['name']} kirlilere eklendi')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final laundryState = ref.watch(laundryViewModelProvider);
+
+    if (laundryState.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Hijyen & Yıkama')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -145,24 +66,24 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
           controller: _tabController,
           labelPadding: const EdgeInsets.symmetric(horizontal: 4),
           tabs: [
-            Tab(text: 'Kirliler (${_needsWash.length})', icon: const Icon(Icons.warning_amber_rounded)),
-            Tab(text: 'Yıkanıyor (${_washing.length})', icon: const Icon(Icons.local_laundry_service_rounded)),
-            Tab(text: 'Temiz (${_clean.length})', icon: const Icon(Icons.check_circle_outline_rounded)),
+            Tab(text: 'Kirliler (${laundryState.needsWashItems.length})', icon: const Icon(Icons.warning_amber_rounded)),
+            Tab(text: 'Yıkanıyor (${laundryState.washingItems.length})', icon: const Icon(Icons.local_laundry_service_rounded)),
+            Tab(text: 'Temiz (${laundryState.cleanItems.length})', icon: const Icon(Icons.check_circle_outline_rounded)),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildLaundryList(_needsWash, 'Kirli Sepeti Boş', 'Harika! Yıkanmayı bekleyen kıyafetin yok.', LaundryState.needsWash, theme),
-          _buildLaundryList(_washing, 'Makine Boş', 'Şu an yıkanan bir kıyafet bulunmuyor.', LaundryState.washing, theme),
-          _buildLaundryList(_clean, 'Temiz Kıyafet Yok', 'Dolabında giyilmeye hazır kıyafetin kalmamış gibi görünüyor.', LaundryState.clean, theme),
+          _buildLaundryList(laundryState.needsWashItems, 'Kirli Sepeti Boş', 'Harika! Yıkanmayı bekleyen kıyafetin yok.', LaundryStatus.needsWash, theme),
+          _buildLaundryList(laundryState.washingItems, 'Makine Boş', 'Şu an yıkanan bir kıyafet bulunmuyor.', LaundryStatus.washing, theme),
+          _buildLaundryList(laundryState.cleanItems, 'Temiz Kıyafet Yok', 'Dolabında giyilmeye hazır kıyafetin kalmamış gibi görünüyor.', LaundryStatus.clean, theme),
         ],
       ),
     );
   }
 
-  Widget _buildLaundryList(List<Map<String, dynamic>> items, String emptyTitle, String emptySubtitle, LaundryState state, ThemeData theme) {
+  Widget _buildLaundryList(List<LaundryItem> items, String emptyTitle, String emptySubtitle, LaundryStatus status, ThemeData theme) {
     if (items.isEmpty) {
       return Center(
         child: Padding(
@@ -171,8 +92,8 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                state == LaundryState.needsWash ? Icons.check_circle_outline_rounded :
-                state == LaundryState.washing ? Icons.local_laundry_service_rounded :
+                status == LaundryStatus.needsWash ? Icons.check_circle_outline_rounded :
+                status == LaundryStatus.washing ? Icons.local_laundry_service_rounded :
                 Icons.dry_cleaning_rounded,
                 size: 80,
                 color: theme.colorScheme.primary.withValues(alpha: 0.5),
@@ -201,12 +122,12 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = items[index];
-        return _buildItemCard(item, state, theme);
+        return _buildItemCard(item, status, theme);
       },
     );
   }
 
-  Widget _buildItemCard(Map<String, dynamic> item, LaundryState state, ThemeData theme) {
+  Widget _buildItemCard(LaundryItem item, LaundryStatus status, ThemeData theme) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -220,10 +141,10 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getIconBackgroundColor(state, theme),
+                color: _getIconBackgroundColor(status, theme),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(item['icon'], color: _getIconColor(state, theme), size: 28),
+              child: Icon(item.icon, color: _getIconColor(status, theme), size: 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -231,14 +152,14 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item['name'],
+                    item.name,
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(
-                        item['category'],
+                        item.category,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 8),
@@ -252,12 +173,12 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        state == LaundryState.clean 
-                          ? '${item['maxWear'] - item['wearCount']} kullanım kaldı'
+                        status == LaundryStatus.clean
+                          ? '${item.maxWear - item.wearCount} kullanım kaldı'
                           : 'Kullanım sınırı doldu',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: state == LaundryState.clean ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error,
-                          fontWeight: state == LaundryState.clean ? FontWeight.normal : FontWeight.bold,
+                          color: status == LaundryStatus.clean ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error,
+                          fontWeight: status == LaundryStatus.clean ? FontWeight.normal : FontWeight.bold,
                         ),
                       ),
                     ],
@@ -266,17 +187,22 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
               ),
             ),
             const SizedBox(width: 8),
-            _buildActionButton(item, state, theme),
+            _buildActionButton(item, status, theme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButton(Map<String, dynamic> item, LaundryState state, ThemeData theme) {
-    if (state == LaundryState.needsWash) {
+  Widget _buildActionButton(LaundryItem item, LaundryStatus status, ThemeData theme) {
+    if (status == LaundryStatus.needsWash) {
       return IconButton.filled(
-        onPressed: () => _moveToWashing(item),
+        onPressed: () {
+          ref.read(laundryViewModelProvider.notifier).moveToWashing(item.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${item.name} yıkamaya eklendi')),
+          );
+        },
         icon: const Icon(Icons.local_laundry_service_rounded),
         tooltip: 'Yıkamaya At',
         style: IconButton.styleFrom(
@@ -284,9 +210,14 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
           foregroundColor: theme.colorScheme.onPrimaryContainer,
         ),
       );
-    } else if (state == LaundryState.washing) {
+    } else if (status == LaundryStatus.washing) {
       return IconButton.filled(
-        onPressed: () => _moveToClean(item),
+        onPressed: () {
+          ref.read(laundryViewModelProvider.notifier).moveToClean(item.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${item.name} temiz olarak işaretlendi')),
+          );
+        },
         icon: const Icon(Icons.check_rounded),
         tooltip: 'Temiz Olarak İşaretle',
         style: IconButton.styleFrom(
@@ -295,9 +226,13 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
         ),
       );
     } else {
-      // Clean state
       return IconButton.outlined(
-        onPressed: () => _moveToNeedsWash(item),
+        onPressed: () {
+          ref.read(laundryViewModelProvider.notifier).moveToNeedsWash(item.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${item.name} kirlilere eklendi')),
+          );
+        },
         icon: const Icon(Icons.water_drop_rounded),
         tooltip: 'Kirlilere Taşı',
         style: IconButton.styleFrom(
@@ -307,21 +242,15 @@ class _LaundryScreenState extends State<LaundryScreen> with SingleTickerProvider
     }
   }
 
-  Color _getIconBackgroundColor(LaundryState state, ThemeData theme) {
-    if (state == LaundryState.needsWash) return theme.colorScheme.errorContainer.withValues(alpha: 0.5);
-    if (state == LaundryState.washing) return theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
+  Color _getIconBackgroundColor(LaundryStatus status, ThemeData theme) {
+    if (status == LaundryStatus.needsWash) return theme.colorScheme.errorContainer.withValues(alpha: 0.5);
+    if (status == LaundryStatus.washing) return theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
     return Colors.green.shade50;
   }
 
-  Color _getIconColor(LaundryState state, ThemeData theme) {
-    if (state == LaundryState.needsWash) return theme.colorScheme.error;
-    if (state == LaundryState.washing) return theme.colorScheme.primary;
+  Color _getIconColor(LaundryStatus status, ThemeData theme) {
+    if (status == LaundryStatus.needsWash) return theme.colorScheme.error;
+    if (status == LaundryStatus.washing) return theme.colorScheme.primary;
     return Colors.green.shade700;
   }
-}
-
-enum LaundryState {
-  needsWash,
-  washing,
-  clean,
 }

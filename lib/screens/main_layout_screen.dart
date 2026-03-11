@@ -3,7 +3,7 @@ import 'package:gircik/features/home/view/home_screen.dart';
 import 'package:gircik/features/wardrobe/view/wardrobe_screen.dart';
 import 'package:gircik/features/outfits/view/outfits_screen.dart';
 import 'package:gircik/features/style_calendar/view/style_calendar_screen.dart';
-import 'package:gircik/screens/laundry_screen.dart';
+import 'package:gircik/features/laundry/view/laundry_screen.dart';
 
 class MainLayoutScreen extends StatefulWidget {
   const MainLayoutScreen({super.key});
