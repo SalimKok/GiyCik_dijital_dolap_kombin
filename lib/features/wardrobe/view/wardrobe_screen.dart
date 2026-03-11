@@ -1,97 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:gircik/screens/clothing_capture_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gircik/features/wardrobe/view/clothing_capture_screen.dart';
+import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
+import 'package:gircik/data/models/clothing_item.dart';
 
-class WardrobeScreen extends StatefulWidget {
+class WardrobeScreen extends ConsumerWidget {
   const WardrobeScreen({super.key});
 
   @override
-  State<WardrobeScreen> createState() => _WardrobeScreenState();
-}
-
-class _WardrobeScreenState extends State<WardrobeScreen> {
-  final List<String> _categories = [
-    'Hepsi',
-    'Üst',
-    'Alt',
-    'Dış giyim',
-    'Ayakkabı',
-    'Aksesuar',
-  ];
-
-  String _selectedCategory = 'Hepsi';
-
-  // Şimdilik örnek veri – ileride backend / local DB ile beslenecek
-  final List<_WardrobeItem> _items = const [
-    _WardrobeItem(
-      name: 'Beyaz Tişört',
-      category: 'Üst',
-      color: 'Beyaz',
-      usageCount: 5,
-    ),
-    _WardrobeItem(
-      name: 'Mavi Kot Pantolon',
-      category: 'Alt',
-      color: 'Mavi',
-      usageCount: 8,
-    ),
-    _WardrobeItem(
-      name: 'Bej Trençkot',
-      category: 'Dış giyim',
-      color: 'Bej',
-      usageCount: 2,
-    ),
-    _WardrobeItem(
-      name: 'Siyah Spor Ayakkabı',
-      category: 'Ayakkabı',
-      color: 'Siyah',
-      usageCount: 10,
-    ),
-    _WardrobeItem(
-      name: 'Altın Renkli Saat',
-      category: 'Aksesuar',
-      color: 'Altın',
-      usageCount: 3,
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-
-    final filteredItems = _selectedCategory == 'Hepsi'
-        ? _items
-        : _items.where((i) => i.category == _selectedCategory).toList();
+    final wardrobeState = ref.watch(wardrobeViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dijital Gardırop'),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 8),
-          _buildCategoryChips(theme),
-          const SizedBox(height: 4),
-          _buildSummaryRow(theme, filteredItems.length),
-          const Divider(height: 1),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: GridView.builder(
-                itemCount: filteredItems.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.78,
+      body: wardrobeState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                const SizedBox(height: 8),
+                _buildCategoryChips(theme, ref, wardrobeState),
+                const SizedBox(height: 4),
+                _buildSummaryRow(context, theme, wardrobeState.filteredItems.length),
+                const Divider(height: 1),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: GridView.builder(
+                      itemCount: wardrobeState.filteredItems.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.78,
+                      ),
+                      itemBuilder: (context, index) {
+                        return _WardrobeCard(item: wardrobeState.filteredItems[index]);
+                      },
+                    ),
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  return _WardrobeCard(item: filteredItems[index]);
-                },
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
@@ -106,20 +58,20 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     );
   }
 
-  Widget _buildCategoryChips(ThemeData theme) {
+  Widget _buildCategoryChips(ThemeData theme, WidgetRef ref, WardrobeState state) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        children: _categories.map((c) {
-          final isSelected = c == _selectedCategory;
+        children: state.categories.map((c) {
+          final isSelected = c == state.selectedCategory;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
               label: Text(c),
               selected: isSelected,
               onSelected: (_) {
-                setState(() => _selectedCategory = c);
+                ref.read(wardrobeViewModelProvider.notifier).selectCategory(c);
               },
               selectedColor: theme.colorScheme.primary.withValues(alpha: 0.15),
               labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -144,7 +96,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     );
   }
 
-  Widget _buildSummaryRow(ThemeData theme, int visibleCount) {
+  Widget _buildSummaryRow(BuildContext context, ThemeData theme, int visibleCount) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
       child: Row(
@@ -194,24 +146,10 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   }
 }
 
-class _WardrobeItem {
-  final String name;
-  final String category;
-  final String color;
-  final int usageCount;
-
-  const _WardrobeItem({
-    required this.name,
-    required this.category,
-    required this.color,
-    required this.usageCount,
-  });
-}
-
 class _WardrobeCard extends StatelessWidget {
   const _WardrobeCard({required this.item});
 
-  final _WardrobeItem item;
+  final ClothingItem item;
 
   @override
   Widget build(BuildContext context) {
