@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gircik/screens/main_layout_screen.dart';
+import 'package:gircik/core/main_layout_screen.dart';
 import 'package:gircik/features/auth/view/login_screen.dart';
-import 'package:gircik/screens/welcome_screen.dart';
+import 'package:gircik/features/onboarding/view/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Uygulama açılışında karşılama / giriş / ana sayfa akışını yönetir.

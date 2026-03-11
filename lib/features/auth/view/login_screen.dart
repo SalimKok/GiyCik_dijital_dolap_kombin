@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/features/auth/view/register_screen.dart';
-import 'package:gircik/screens/main_layout_screen.dart';
+import 'package:gircik/core/main_layout_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gircik/features/auth/viewmodel/auth_viewmodel.dart';
 
