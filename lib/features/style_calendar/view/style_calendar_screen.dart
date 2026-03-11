@@ -1,58 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:gircik/features/style_calendar/viewmodel/style_calendar_viewmodel.dart';
 
-class StyleCalendarScreen extends StatefulWidget {
+class StyleCalendarScreen extends ConsumerStatefulWidget {
   const StyleCalendarScreen({super.key});
 
   @override
-  State<StyleCalendarScreen> createState() => _StyleCalendarScreenState();
+  ConsumerState<StyleCalendarScreen> createState() => _StyleCalendarScreenState();
 }
 
-class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-
-  // Mock data for events/outfits
-  final Map<DateTime, List<String>> _events = {
-    DateTime.now().subtract(const Duration(days: 1)): ['İş Görüşmesi - Lacivert Takım'],
-    DateTime.now(): ['Akşam Yemeği - Siyah Elbise'],
-    DateTime.now().add(const Duration(days: 2)): ['Hafta Sonu Yürüyüşü - Spor Kombin'],
-  };
-
+class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
     initializeDateFormatting('tr_TR', null);
-  }
-
-  List<String> _getEventsForDay(DateTime day) {
-    // Basic date comparison (ignoring time)
-    for (final eventDate in _events.keys) {
-      if (isSameDay(eventDate, day)) {
-        return _events[eventDate]!;
-      }
-    }
-    return [];
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final calState = ref.watch(styleCalendarViewModelProvider);
+
+    if (calState.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Stil Takvimi')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final selectedEvents = calState.getEventsForDay(calState.selectedDay!);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stil Takvimi'),
       ),
       body: Column(
         children: [
-          _buildCalendar(theme),
+          _buildCalendar(theme, calState),
           const SizedBox(height: 16),
           Expanded(
-            child: _buildEventList(theme),
+            child: _buildEventList(theme, calState, selectedEvents),
           ),
         ],
       ),
@@ -68,7 +58,7 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
     );
   }
 
-  Widget _buildCalendar(ThemeData theme) {
+  Widget _buildCalendar(ThemeData theme, StyleCalendarState calState) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -85,30 +75,25 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
       child: TableCalendar(
         firstDay: DateTime.utc(2020, 1, 1),
         lastDay: DateTime.utc(2030, 12, 31),
-        focusedDay: _focusedDay,
-        calendarFormat: _calendarFormat,
+        focusedDay: calState.focusedDay,
+        calendarFormat: calState.calendarFormat,
         selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
+          return isSameDay(calState.selectedDay, day);
         },
         onDaySelected: (selectedDay, focusedDay) {
-          if (!isSameDay(_selectedDay, selectedDay)) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
+          if (!isSameDay(calState.selectedDay, selectedDay)) {
+            ref.read(styleCalendarViewModelProvider.notifier).selectDay(selectedDay, focusedDay);
           }
         },
         onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            setState(() {
-              _calendarFormat = format;
-            });
+          if (calState.calendarFormat != format) {
+            ref.read(styleCalendarViewModelProvider.notifier).changeFormat(format);
           }
         },
         onPageChanged: (focusedDay) {
-          _focusedDay = focusedDay;
+          ref.read(styleCalendarViewModelProvider.notifier).changePage(focusedDay);
         },
-        eventLoader: _getEventsForDay,
+        eventLoader: (day) => calState.getEventsForDay(day),
         locale: 'tr_TR',
         startingDayOfWeek: StartingDayOfWeek.monday,
         headerStyle: HeaderStyle(
@@ -155,9 +140,7 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
     );
   }
 
-  Widget _buildEventList(ThemeData theme) {
-    final events = _getEventsForDay(_selectedDay!);
-
+  Widget _buildEventList(ThemeData theme, StyleCalendarState calState, List events) {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -179,7 +162,7 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  DateFormat('d MMMM yyyy', 'tr_TR').format(_selectedDay!),
+                  DateFormat('d MMMM yyyy', 'tr_TR').format(calState.selectedDay!),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -201,7 +184,7 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
-                      return _buildEventCard(theme, events[index]);
+                      return _buildEventCard(theme, events[index].title);
                     },
                   ),
           ),
@@ -300,7 +283,6 @@ class _StyleCalendarScreenState extends State<StyleCalendarScreen> {
   }
 
   void _showAddEventDialog(BuildContext context) {
-    // A simple bottom sheet or dialog to add a note
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
