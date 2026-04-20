@@ -6,7 +6,7 @@ class ClothingItem {
   final String category;
   final String color;
   final int usageCount;
-  // TODO: Add imagePath or URL when backend is implemented
+  final String? imageUrl;
 
   const ClothingItem({
     required this.id,
@@ -14,6 +14,7 @@ class ClothingItem {
     required this.category,
     required this.color,
     this.usageCount = 0,
+    this.imageUrl,
   });
 
   ClothingItem copyWith({
@@ -22,6 +23,7 @@ class ClothingItem {
     String? category,
     String? color,
     int? usageCount,
+    String? imageUrl,
   }) {
     return ClothingItem(
       id: id ?? this.id,
@@ -29,6 +31,7 @@ class ClothingItem {
       category: category ?? this.category,
       color: color ?? this.color,
       usageCount: usageCount ?? this.usageCount,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -39,6 +42,7 @@ class ClothingItem {
       category: json['category'] as String,
       color: json['color'] as String,
       usageCount: json['usage_count'] as int? ?? 0,
+      imageUrl: json['image_url'] as String?,
     );
   }
 
@@ -49,6 +53,7 @@ class ClothingItem {
       'category': category,
       'color': color,
       'usage_count': usageCount,
+      'image_url': imageUrl,
     };
   }
 }

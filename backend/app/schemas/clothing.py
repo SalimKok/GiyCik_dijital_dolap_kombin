@@ -7,6 +7,7 @@ class ClothingItemBase(BaseModel):
     name: str
     category: str
     color: str
+    image_url: Optional[str] = None
 
 # Properties to receive on item creation
 class ClothingItemCreate(ClothingItemBase):

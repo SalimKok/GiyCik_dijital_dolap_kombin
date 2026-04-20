@@ -20,7 +20,8 @@ async def create_clothing_item(db: AsyncSession, item_in: ClothingItemCreate, us
         user_id=user_id,
         name=item_in.name,
         category=item_in.category,
-        color=item_in.color
+        color=item_in.color,
+        image_url=item_in.image_url
     )
     db.add(db_item)
     await db.commit()

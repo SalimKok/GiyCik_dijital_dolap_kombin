@@ -1,6 +1,8 @@
 from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+from sqlalchemy import select
 
 from app.database import get_db
 from app.schemas.clothing import ClothingItem, ClothingItemCreate, ClothingItemUpdate
@@ -18,6 +20,36 @@ async def read_clothing_items(
     """Retrieve all clothing items for current user."""
     items = await clothing_service.get_clothing_items(db, user_id=current_user.id)
     return items
+
+@router.post("/upload", response_model=dict)
+async def upload_clothing_image(
+    file: UploadFile = File(...),
+    current_user: Annotated[User, Depends(get_current_user)] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Upload an image for a clothing item to Database and return its URL."""
+    image_id = uuid.uuid4().hex
+    data = await file.read()
+    mime_type = file.content_type or "image/jpeg"
+    
+    from app.models.clothing_item import ClothingImage
+    db_image = ClothingImage(id=image_id, data=data, mime_type=mime_type)
+    db.add(db_image)
+    await db.commit()
+    
+    return {"url": f"/api/clothing/image/{image_id}"}
+    
+@router.get("/image/{image_id}")
+async def get_clothing_image(image_id: str, db: AsyncSession = Depends(get_db)):
+    """Retrieve an image from Database directly."""
+    from app.models.clothing_item import ClothingImage
+    
+    result = await db.execute(select(ClothingImage).where(ClothingImage.id == image_id))
+    db_image = result.scalar_one_or_none()
+    if not db_image:
+        raise HTTPException(status_code=404, detail="Image not found")
+        
+    return Response(content=db_image.data, media_type=db_image.mime_type)
 
 @router.post("/", response_model=ClothingItem)
 async def create_clothing_item(

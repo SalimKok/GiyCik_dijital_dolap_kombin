@@ -75,10 +75,17 @@ class WardrobeViewModel extends Notifier<WardrobeState> {
     state = state.copyWith(selectedCategory: category);
   }
 
-  Future<void> addItem(ClothingItem item) async {
+  Future<void> addItem(ClothingItem item, {String? imagePath}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final newItem = await _repository.createClothingItem(item);
+      String? imageUrl;
+      if (imagePath != null && imagePath.isNotEmpty) {
+        imageUrl = await _repository.uploadClothingImage(imagePath);
+      }
+      
+      final itemToSave = item.copyWith(imageUrl: imageUrl);
+      final newItem = await _repository.createClothingItem(itemToSave);
+      
       state = state.copyWith(
         isLoading: false, 
         items: [...state.items, newItem]

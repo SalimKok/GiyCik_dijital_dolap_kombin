@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/features/wardrobe/view/clothing_capture_screen.dart';
 import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:gircik/data/models/clothing_item.dart';
+import 'package:gircik/core/constants/api_constants.dart';
 
 class WardrobeScreen extends ConsumerWidget {
   const WardrobeScreen({super.key});
@@ -151,6 +152,12 @@ class _WardrobeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    // Construct full URL using base URL (stripping '/api' since item.imageUrl starts with '/api/')
+    final String? fullImageUrl = item.imageUrl != null && item.imageUrl!.isNotEmpty
+        ? '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}'
+        : null;
+
     return Material(
       color: theme.cardTheme.color,
       shape: theme.cardTheme.shape as RoundedRectangleBorder,
@@ -173,11 +180,16 @@ class _WardrobeCard extends StatelessWidget {
                     color: theme.colorScheme.primary.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.checkroom_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 32,
-                  ),
+                  child: fullImageUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            fullImageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => _buildFallbackIcon(theme),
+                          ),
+                        )
+                      : _buildFallbackIcon(theme),
                 ),
               ),
               const SizedBox(height: 8),
@@ -215,4 +227,13 @@ class _WardrobeCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFallbackIcon(ThemeData theme) {
+    return Icon(
+      Icons.checkroom_rounded,
+      color: theme.colorScheme.primary,
+      size: 32,
+    );
+  }
 }
+
