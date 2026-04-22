@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/features/outfits/view/outfit_recommendation_screen.dart';
 import 'package:gircik/features/outfits/viewmodel/outfits_viewmodel.dart';
+import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:gircik/data/models/outfit_item.dart';
+import 'package:gircik/core/constants/api_constants.dart';
 
 class OutfitsScreen extends ConsumerStatefulWidget {
   const OutfitsScreen({super.key});
@@ -103,6 +105,13 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
   }
 
   Widget _buildOutfitCard(OutfitItem outfit, ThemeData theme) {
+    final wardrobeItems = ref.watch(wardrobeViewModelProvider).items;
+    
+    // Kombin parçalarını eşleştirip resimlerini bulalım
+    final matchedClothes = outfit.items.map((outfitItem) {
+        return wardrobeItems.where((w) => w.id == outfitItem.clothingItemId).firstOrNull;
+    }).where((item) => item != null).toList();
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -154,40 +163,68 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
             ),
           ),
           
-          // Items section
+          // Items section with Images
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: outfit.items.map((item) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
+            child: matchedClothes.isNotEmpty
+              ? Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: matchedClothes.map((item) {
+                    final String? imageUrl = item!.imageUrl != null && item.imageUrl!.isNotEmpty
+                        ? (item.imageUrl!.startsWith('http') 
+                            ? item.imageUrl! 
+                            : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
+                        : null;
+                    return Container(
+                      width: 76,
+                      height: 100,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: theme.colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
                       ),
-                      child: Icon(
-                        item.icon,
-                        size: 20,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      item.name,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
+                      clipBehavior: Clip.antiAlias,
+                      child: imageUrl != null
+                          ? Image.network(
+                              imageUrl, 
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: SizedBox(
+                                    width: 20, 
+                                    height: 20, 
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2, 
+                                      color: theme.colorScheme.primary.withValues(alpha: 0.5)
+                                    )
+                                  )
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => _buildFallbackIcon(theme),
+                            )
+                          : _buildFallbackIcon(theme),
+                    );
+                  }).toList(),
+                )
+              : Text("Giysiler bulunamadı.", style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFallbackIcon(ThemeData theme) {
+    return Center(
+      child: Icon(Icons.checkroom_rounded, color: theme.colorScheme.primary.withValues(alpha: 0.5), size: 32),
     );
   }
 

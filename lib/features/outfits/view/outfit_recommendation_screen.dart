@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+import 'package:gircik/features/outfits/viewmodel/outfits_viewmodel.dart';
+import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
+import 'package:gircik/data/models/outfit_item.dart';
 
-class OutfitRecommendationScreen extends StatefulWidget {
+class OutfitRecommendationScreen extends ConsumerStatefulWidget {
   const OutfitRecommendationScreen({super.key});
 
   @override
-  State<OutfitRecommendationScreen> createState() => _OutfitRecommendationScreenState();
+  ConsumerState<OutfitRecommendationScreen> createState() => _OutfitRecommendationScreenState();
 }
 
-class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen> with SingleTickerProviderStateMixin {
+class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendationScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // AI Form state
@@ -19,6 +24,14 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
   bool _isLoadingRecommendation = false;
   Map<String, String>? _aiRecommendation;
 
+  // Manual Form state
+  final _manualTitleController = TextEditingController();
+  String? _manualTopId;
+  String? _manualBottomId;
+  String? _manualShoesId;
+  String? _manualAccessoryId;
+  bool _isSavingManual = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +40,7 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
 
   @override
   void dispose() {
+    _manualTitleController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -44,21 +58,29 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
       _aiRecommendation = null;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() {
-        _isLoadingRecommendation = false;
-        _aiRecommendation = {
-          'title': '$_selectedStyle Tarzı $_selectedEvent Kombini',
-          'description': 'Bu $_selectedSeason gününde $_selectedWeather havaya uygun, şık ve rahat bir görünüm.',
-          'top': 'Beyaz Keten Gömlek',
-          'bottom': 'Açık Mavi Kot Pantolon',
-          'shoes': 'Beyaz Sneaker',
-          'accessory': 'Güneş Gözlüğü',
-        };
-      });
+    try {
+      final result = await ref.read(outfitsViewModelProvider.notifier).generateAIOutfit(
+        season: _selectedSeason!,
+        weather: _selectedWeather!,
+        event: _selectedEvent!,
+        style: _selectedStyle!,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _isLoadingRecommendation = false;
+          _aiRecommendation = result.map((key, value) => MapEntry(key, value?.toString() ?? ''));
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingRecommendation = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
@@ -187,6 +209,70 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
     );
   }
 
+  void _saveAIOutfit() async {
+    if (_aiRecommendation == null) return;
+    
+    setState(() => _isLoadingRecommendation = true);
+
+    try {
+      final wardrobeState = ref.read(wardrobeViewModelProvider);
+      
+      OutfitItemData? _createData(String? id, String category) {
+        if (id == null || id.isEmpty || id == 'null') return null;
+        final item = wardrobeState.items.where((i) => i.id == id).firstOrNull;
+        if (item == null) return null;
+        
+        return OutfitItemData(
+          name: item.name,
+          clothingItemId: item.id,
+          displayOrder: 0,
+          icon: Icons.checkroom,
+        );
+      }
+
+      final items = [
+        _createData(_aiRecommendation!['top_id'], 'Üst Giyim'),
+        _createData(_aiRecommendation!['bottom_id'], 'Alt Giyim'),
+        _createData(_aiRecommendation!['shoes_id'], 'Ayakkabı'),
+        _createData(_aiRecommendation!['outerwear_id'], 'Dış Giyim'),
+        _createData(_aiRecommendation!['accessory_id'], 'Aksesuar'),
+      ].whereType<OutfitItemData>().toList();
+
+      for (int i = 0; i < items.length; i++) {
+        items[i] = items[i].copyWith(displayOrder: i);
+      }
+
+      final outfit = OutfitItem(
+        id: const Uuid().v4(),
+        title: _aiRecommendation!['title'] ?? 'AI Kombini',
+        style: _selectedStyle ?? 'Rahat',
+        season: _selectedSeason ?? 'Mevsimlik',
+        items: items,
+      );
+
+      await ref.read(outfitsViewModelProvider.notifier).addOutfit(outfit);
+      
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kombin başarıyla kaydedildi!')),
+        );
+      }
+    } catch(e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+        setState(() => _isLoadingRecommendation = false);
+      }
+    }
+  }
+
+  String _getItemName(String? id) {
+    if (id == null || id.isEmpty || id == 'null') return 'Seçilmedi';
+    final wardrobeState = ref.read(wardrobeViewModelProvider);
+    final item = wardrobeState.items.where((i) => i.id == id).firstOrNull;
+    return item?.name ?? 'Bulunamadı';
+  }
+
   Widget _buildRecommendationCard(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -217,7 +303,7 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _aiRecommendation!['title']!,
+                      _aiRecommendation!['title'] ?? 'Kombin',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -237,7 +323,7 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            _aiRecommendation!['description']!,
+            _aiRecommendation!['description'] ?? '',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -245,19 +331,26 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
-          _buildOutfitItem(theme, 'Üst Giyim', _aiRecommendation!['top']!, Icons.dry_cleaning_rounded),
+          if (_aiRecommendation!['top_id'] != null)
+             _buildOutfitItem(theme, 'Üst Giyim', _getItemName(_aiRecommendation!['top_id']), Icons.dry_cleaning_rounded),
           const SizedBox(height: 12),
-          _buildOutfitItem(theme, 'Alt Giyim', _aiRecommendation!['bottom']!, Icons.airline_seat_legroom_normal_rounded),
+          if (_aiRecommendation!['bottom_id'] != null)
+             _buildOutfitItem(theme, 'Alt Giyim', _getItemName(_aiRecommendation!['bottom_id']), Icons.airline_seat_legroom_normal_rounded),
           const SizedBox(height: 12),
-          _buildOutfitItem(theme, 'Ayakkabı', _aiRecommendation!['shoes']!, Icons.snowshoeing_rounded),
+          if (_aiRecommendation!['shoes_id'] != null)
+             _buildOutfitItem(theme, 'Ayakkabı', _getItemName(_aiRecommendation!['shoes_id']), Icons.snowshoeing_rounded),
           const SizedBox(height: 12),
-          _buildOutfitItem(theme, 'Aksesuar', _aiRecommendation!['accessory']!, Icons.watch_rounded),
+          if (_aiRecommendation!['outerwear_id'] != null && _aiRecommendation!['outerwear_id'] != 'null' && _aiRecommendation!['outerwear_id'] != '')
+             _buildOutfitItem(theme, 'Dış Giyim', _getItemName(_aiRecommendation!['outerwear_id']), Icons.dry_cleaning),
+          const SizedBox(height: 12),
+          if (_aiRecommendation!['accessory_id'] != null && _aiRecommendation!['accessory_id'] != 'null' && _aiRecommendation!['accessory_id'] != '')
+             _buildOutfitItem(theme, 'Aksesuar', _getItemName(_aiRecommendation!['accessory_id']), Icons.watch_rounded),
           const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: _generateRecommendation,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -269,7 +362,7 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: _saveAIOutfit,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     backgroundColor: theme.colorScheme.primary,
@@ -326,17 +419,25 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _manualTitleController,
+            decoration: InputDecoration(
+              labelText: 'Kombin Adı',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
           const SizedBox(height: 24),
-          _buildManualSelectionBox(theme, 'Üst Giyim Seç', Icons.dry_cleaning_rounded),
+          _buildManualSelectionBox(theme, 'Üst Giyim', 'Üst', _manualTopId, Icons.dry_cleaning_rounded, (id) => setState(() => _manualTopId = id)),
           const SizedBox(height: 16),
-          _buildManualSelectionBox(theme, 'Alt Giyim Seç', Icons.airline_seat_legroom_normal_rounded),
+          _buildManualSelectionBox(theme, 'Alt Giyim', 'Alt', _manualBottomId, Icons.airline_seat_legroom_normal_rounded, (id) => setState(() => _manualBottomId = id)),
           const SizedBox(height: 16),
-          _buildManualSelectionBox(theme, 'Ayakkabı Seç', Icons.snowshoeing_rounded),
+          _buildManualSelectionBox(theme, 'Ayakkabı', 'Ayakkabı', _manualShoesId, Icons.snowshoeing_rounded, (id) => setState(() => _manualShoesId = id)),
           const SizedBox(height: 16),
-          _buildManualSelectionBox(theme, 'Aksesuar Seç', Icons.watch_rounded),
+          _buildManualSelectionBox(theme, 'Aksesuar', 'Aksesuar', _manualAccessoryId, Icons.watch_rounded, (id) => setState(() => _manualAccessoryId = id)),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: _isSavingManual ? null : _saveManualOutfit,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: theme.colorScheme.primary,
@@ -346,17 +447,149 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text('Kombini Kaydet'),
+            child: _isSavingManual 
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Text('Kombini Kaydet'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildManualSelectionBox(ThemeData theme, String title, IconData icon) {
+  void _saveManualOutfit() async {
+    if (_manualTitleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen kombine bir ad verin.')));
+      return;
+    }
+
+    if (_manualTopId == null && _manualBottomId == null && _manualShoesId == null && _manualAccessoryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kombine en az bir parça ekleyin.')));
+      return;
+    }
+
+    setState(() => _isSavingManual = true);
+
+    try {
+      final wardrobeState = ref.read(wardrobeViewModelProvider);
+      
+      OutfitItemData? _createData(String? id, String category) {
+        if (id == null || id.isEmpty) return null;
+        final item = wardrobeState.items.where((i) => i.id == id).firstOrNull;
+        if (item == null) return null;
+        
+        return OutfitItemData(
+          name: item.name,
+          clothingItemId: item.id,
+          displayOrder: 0,
+          icon: Icons.checkroom,
+        );
+      }
+
+      final items = [
+        _createData(_manualTopId, 'Üst Giyim'),
+        _createData(_manualBottomId, 'Alt Giyim'),
+        _createData(_manualShoesId, 'Ayakkabı'),
+        _createData(_manualAccessoryId, 'Aksesuar'),
+      ].whereType<OutfitItemData>().toList();
+
+      for (int i = 0; i < items.length; i++) {
+        items[i] = items[i].copyWith(displayOrder: i);
+      }
+
+      final outfit = OutfitItem(
+        id: const Uuid().v4(),
+        title: _manualTitleController.text.trim(),
+        style: 'Manuel',
+        season: 'Mevsimlik',
+        items: items,
+      );
+
+      await ref.read(outfitsViewModelProvider.notifier).addOutfit(outfit);
+      
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kombin başarıyla kaydedildi!')),
+        );
+      }
+    } catch(e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+        setState(() => _isSavingManual = false);
+      }
+    }
+  }
+
+  void _showItemSelectionSheet(String title, String category, Function(String?) onSelected) {
+    final wardrobeState = ref.read(wardrobeViewModelProvider);
+    final categoryItems = wardrobeState.items.where((i) => i.category == category).toList();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              if (categoryItems.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('Bu kategoride kıyafetiniz bulunmuyor.'),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: categoryItems.length,
+                    itemBuilder: (ctx, index) {
+                      final item = categoryItems[index];
+                      return ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(ctx).colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.checkroom_rounded, color: Theme.of(ctx).colorScheme.primary),
+                        ),
+                        title: Text(item.name),
+                        subtitle: Text(item.color),
+                        onTap: () {
+                          onSelected(item.id);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              TextButton(
+                onPressed: () {
+                  onSelected(null);
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Seçimi Temizle', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildManualSelectionBox(ThemeData theme, String title, String category, String? selectedId, IconData icon, Function(String?) onSelected) {
+    final itemName = selectedId != null ? _getItemName(selectedId) : '$title Seç';
+    final hasSelection = selectedId != null;
+
     return InkWell(
       onTap: () {
-        // TODO: Open wardrobe selection bottom sheet
+        _showItemSelectionSheet(title, category, onSelected);
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -365,7 +598,7 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
           color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: hasSelection ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
             style: BorderStyle.solid,
             width: 2,
           ),
@@ -375,23 +608,24 @@ class _OutfitRecommendationScreenState extends State<OutfitRecommendationScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: hasSelection ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+              child: Icon(icon, color: hasSelection ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                title,
+                itemName,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: hasSelection ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+                  fontWeight: hasSelection ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ),
             Icon(
-              Icons.add_circle_outline_rounded,
-              color: theme.colorScheme.primary,
+              hasSelection ? Icons.edit_rounded : Icons.add_circle_outline_rounded,
+              color: hasSelection ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),

@@ -20,13 +20,36 @@ class OutfitRepository {
 
   Future<OutfitItem> createOutfit(OutfitItem outfit) async {
     try {
+        print(outfit.toJson());
       final response = await _apiClient.client.post(
         '/outfits/',
-        data: outfit.toJson()..remove('id'),
+        data: outfit.toJson(),
       );
       return OutfitItem.fromJson(response.data);
     } catch (e) {
-      throw Exception('Kombin oluşturulamadı: \${_handleError(e)}');
+      throw Exception('Kombin oluşturulamadı: ${_handleError(e)}');
+    }
+  }
+
+  Future<Map<String, dynamic>> generateAIOutfit({
+    required String season,
+    required String weather,
+    required String event,
+    required String style,
+  }) async {
+    try {
+      final response = await _apiClient.client.post(
+        '/outfits/generate',
+        data: {
+          'season': season,
+          'weather': weather,
+          'event': event,
+          'style': style,
+        },
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception('Kombin önerisi alınamadı: ${_handleError(e)}');
     }
   }
 

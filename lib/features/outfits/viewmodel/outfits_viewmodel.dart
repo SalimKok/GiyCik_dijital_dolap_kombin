@@ -82,7 +82,22 @@ class OutfitsViewModel extends Notifier<OutfitsState> {
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      throw e; // Hataları UI'da gösterebilmek için fırlatıyoruz
     }
+  }
+
+  Future<Map<String, dynamic>> generateAIOutfit({
+    required String season,
+    required String weather,
+    required String event,
+    required String style,
+  }) async {
+    return await _repository.generateAIOutfit(
+      season: season,
+      weather: weather,
+      event: event,
+      style: style,
+    );
   }
 }
 

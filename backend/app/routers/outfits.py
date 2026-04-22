@@ -1,6 +1,7 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 from app.database import get_db
 from app.schemas.outfit import Outfit, OutfitCreate, OutfitUpdate
@@ -18,6 +19,36 @@ async def read_outfits(
     """Retrieve all outfits for current user."""
     outfits = await outfit_service.get_outfits(db, user_id=current_user.id)
     return outfits
+
+class OutfitGenerateRequest(BaseModel):
+    season: str
+    weather: str
+    event: str
+    style: str
+
+@router.post("/generate", response_model=dict)
+async def generate_outfit_recommendation(
+    request: OutfitGenerateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Generate an outfit recommendation using AI."""
+    from app.services import clothing_service, vision_service
+    clothes = await clothing_service.get_clothing_items(db, user_id=current_user.id)
+    
+    wardrobe = []
+    for c in clothes:
+        wardrobe.append({"id": c.id, "name": c.name, "category": c.category, "color": c.color})
+
+    if not wardrobe:
+        raise HTTPException(status_code=400, detail="Gardırobunuzda hiç eşya yok. Lütfen kombin önerisi almadan önce kıyafet ekleyin.")
+
+    result = vision_service.generate_outfit(wardrobe, request.season, request.weather, request.event, request.style)
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    elif not result:
+        raise HTTPException(status_code=500, detail="Yapay Zeka uyumlu bir kombin öneremedi. Daha fazla kıyafet eklemeyi deneyebilirsiniz.")
+    return result
 
 @router.post("/", response_model=Outfit)
 async def create_outfit(
