@@ -43,13 +43,32 @@ async def create_outfit(db: AsyncSession, outfit_in: OutfitCreate, user_id: int)
 
 async def update_outfit(db: AsyncSession, db_outfit: Outfit, outfit_update: OutfitUpdate):
     update_data = outfit_update.model_dump(exclude_unset=True)
+    
+    items_data = update_data.pop("items", None)
+
     for key, value in update_data.items():
         setattr(db_outfit, key, value)
     
-    db.add(db_outfit)
+    if items_data is not None:
+        # Clear old items via ORM relationship (avoids session state conflicts)
+        db_outfit.items.clear()
+        await db.flush()
+        
+        # Create new items
+        for idx, item in enumerate(items_data):
+            db_item = OutfitItemLink(
+                outfit_id=db_outfit.id,
+                clothing_item_id=item['clothing_item_id'],
+                name=item['name'],
+                icon_name=item.get('icon_name'),
+                display_order=idx
+            )
+            db_outfit.items.append(db_item)
+
     await db.commit()
-    await db.refresh(db_outfit)
-    return db_outfit
+    
+    # Reload with relationships
+    return await get_outfit(db, db_outfit.id, db_outfit.user_id)
 
 async def toggle_favorite(db: AsyncSession, outfit_id: str, user_id: int):
     outfit = await get_outfit(db, outfit_id, user_id)

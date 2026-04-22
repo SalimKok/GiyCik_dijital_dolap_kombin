@@ -6,7 +6,9 @@ import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:gircik/data/models/outfit_item.dart';
 
 class OutfitRecommendationScreen extends ConsumerStatefulWidget {
-  const OutfitRecommendationScreen({super.key});
+  final OutfitItem? editingOutfit;
+  
+  const OutfitRecommendationScreen({super.key, this.editingOutfit});
 
   @override
   ConsumerState<OutfitRecommendationScreen> createState() => _OutfitRecommendationScreenState();
@@ -35,7 +37,32 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    if (widget.editingOutfit != null) {
+      _tabController = TabController(length: 2, vsync: this, initialIndex: 1); // Open manual tab
+      _manualTitleController.text = widget.editingOutfit!.title;
+      // Delay population to ensure wardrobe is loaded or accessible
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _populateEditingOutfit();
+      });
+    } else {
+      _tabController = TabController(length: 2, vsync: this);
+    }
+  }
+
+  void _populateEditingOutfit() {
+    if (widget.editingOutfit == null) return;
+    final wardrobeState = ref.read(wardrobeViewModelProvider);
+    
+    for (final outfitItem in widget.editingOutfit!.items) {
+      final clothingItem = wardrobeState.items.where((w) => w.id == outfitItem.clothingItemId).firstOrNull;
+      if (clothingItem != null) {
+        if (clothingItem.category == 'Üst Giyim' || clothingItem.category == 'Üst') _manualTopId = clothingItem.id;
+        else if (clothingItem.category == 'Alt Giyim' || clothingItem.category == 'Alt') _manualBottomId = clothingItem.id;
+        else if (clothingItem.category == 'Ayakkabı') _manualShoesId = clothingItem.id;
+        else if (clothingItem.category == 'Aksesuar') _manualAccessoryId = clothingItem.id;
+      }
+    }
+    setState(() {});
   }
 
   @override
@@ -497,22 +524,28 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
       }
 
       final outfit = OutfitItem(
-        id: const Uuid().v4(),
+        id: widget.editingOutfit?.id ?? const Uuid().v4(),
         title: _manualTitleController.text.trim(),
-        style: 'Manuel',
-        season: 'Mevsimlik',
+        style: widget.editingOutfit?.style ?? 'Günlük',
+        season: widget.editingOutfit?.season ?? 'Mevsimlik',
+        isFavorite: widget.editingOutfit?.isFavorite ?? false,
         items: items,
       );
 
-      await ref.read(outfitsViewModelProvider.notifier).addOutfit(outfit);
+      final outfitsViewModel = ref.read(outfitsViewModelProvider.notifier);
+      if (widget.editingOutfit != null) {
+        await outfitsViewModel.updateOutfit(outfit);
+      } else {
+        await outfitsViewModel.addOutfit(outfit);
+      }
       
       if (mounted) {
-        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kombin başarıyla kaydedildi!')),
+          SnackBar(content: Text(widget.editingOutfit != null ? 'Kombin başarıyla güncellendi!' : 'Kombin başarıyla kaydedildi!')),
         );
+        Navigator.of(context).pop();
       }
-    } catch(e) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
         setState(() => _isSavingManual = false);

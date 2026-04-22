@@ -35,6 +35,7 @@ class OutfitUpdate(BaseModel):
     style: Optional[str] = None
     season: Optional[str] = None
     is_favorite: Optional[bool] = None
+    items: Optional[List[OutfitItemDataCreate]] = None
 
 # Properties shared by models stored in DB
 class OutfitInDBBase(OutfitBase):

@@ -20,7 +20,6 @@ class OutfitRepository {
 
   Future<OutfitItem> createOutfit(OutfitItem outfit) async {
     try {
-        print(outfit.toJson());
       final response = await _apiClient.client.post(
         '/outfits/',
         data: outfit.toJson(),
@@ -28,6 +27,18 @@ class OutfitRepository {
       return OutfitItem.fromJson(response.data);
     } catch (e) {
       throw Exception('Kombin oluşturulamadı: ${_handleError(e)}');
+    }
+  }
+
+  Future<OutfitItem> updateOutfit(OutfitItem outfit) async {
+    try {
+      final response = await _apiClient.client.put(
+        '/outfits/${outfit.id}',
+        data: outfit.toJson(),
+      );
+      return OutfitItem.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Kombin güncellenemedi: ${_handleError(e)}');
     }
   }
 

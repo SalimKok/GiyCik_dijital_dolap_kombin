@@ -150,14 +150,55 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    ref.read(outfitsViewModelProvider.notifier).toggleFavorite(outfit.id);
-                  },
-                  icon: Icon(
-                    outfit.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                    color: outfit.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        ref.read(outfitsViewModelProvider.notifier).toggleFavorite(outfit.id);
+                      },
+                      icon: Icon(
+                        outfit.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        color: outfit.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert_rounded, color: theme.colorScheme.onSurfaceVariant),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                           Navigator.of(context).push(
+                             MaterialPageRoute(
+                               builder: (context) => OutfitRecommendationScreen(editingOutfit: outfit),
+                             ),
+                           );
+                        } else if (value == 'delete') {
+                           _confirmDelete(context, outfit);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_rounded, size: 20),
+                              SizedBox(width: 8),
+                              Text('Düzenle'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_rounded, size: 20, color: theme.colorScheme.error),
+                              const SizedBox(width: 8),
+                              Text('Sil', style: TextStyle(color: theme.colorScheme.error)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -242,6 +283,34 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, OutfitItem outfit) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Kombini Sil'),
+        content: const Text('Bu kombini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ref.read(outfitsViewModelProvider.notifier).deleteOutfit(outfit.id).catchError((error) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                }
+              });
+            },
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            child: const Text('Sil'),
+          ),
+        ],
       ),
     );
   }

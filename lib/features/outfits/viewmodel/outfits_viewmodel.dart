@@ -82,7 +82,40 @@ class OutfitsViewModel extends Notifier<OutfitsState> {
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
-      throw e; // Hataları UI'da gösterebilmek için fırlatıyoruz
+      rethrow;
+    }
+  }
+
+  Future<void> updateOutfit(OutfitItem outfit) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updatedOutfit = await _repository.updateOutfit(outfit);
+      final newOutfits = state.outfits.map((o) {
+        return o.id == updatedOutfit.id ? updatedOutfit : o;
+      }).toList();
+      
+      state = state.copyWith(
+        isLoading: false, 
+        outfits: newOutfits
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> deleteOutfit(String id) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repository.deleteOutfit(id);
+      final newOutfits = state.outfits.where((o) => o.id != id).toList();
+      state = state.copyWith(
+        isLoading: false, 
+        outfits: newOutfits
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
     }
   }
 
