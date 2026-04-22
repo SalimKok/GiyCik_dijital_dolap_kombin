@@ -9,7 +9,12 @@ import 'package:gircik/features/wardrobe/repository/clothing_repository.dart';
 import 'package:gircik/core/constants/api_constants.dart';
 
 class ClothingCaptureScreen extends ConsumerStatefulWidget {
-  const ClothingCaptureScreen({super.key});
+  final ClothingItem? existingItem;
+
+  const ClothingCaptureScreen({
+    super.key,
+    this.existingItem,
+  });
 
   @override
   ConsumerState<ClothingCaptureScreen> createState() => _ClothingCaptureScreenState();
@@ -32,6 +37,24 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
   
   bool _isAnalyzing = false;
   bool _isSaving = false;
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingItem != null) {
+      _nameController.text = widget.existingItem!.name;
+      _colorController.text = widget.existingItem!.color;
+      
+      if (_categories.contains(widget.existingItem!.category)) {
+        _selectedCategory = widget.existingItem!.category;
+      }
+      if (_seasons.contains(widget.existingItem!.season)) {
+        _selectedSeason = widget.existingItem!.season;
+      }
+      _processedImageUrl = widget.existingItem!.imageUrl;
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -115,11 +138,17 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
         imageUrl: _processedImageUrl, // Already uploaded and background removed
       );
 
-      // If we don't have a processed image url, fallback to standard upload flow using local path.
-      await ref.read(wardrobeViewModelProvider.notifier).addItem(
-        newItem, 
-        imagePath: _processedImageUrl == null ? _imageFile?.path : null, 
-      );
+      if (widget.existingItem != null) {
+        // Edit mode
+        final updatedItem = newItem.copyWith(id: widget.existingItem!.id);
+        await ref.read(wardrobeViewModelProvider.notifier).updateItem(updatedItem);
+      } else {
+        // Add mode
+        await ref.read(wardrobeViewModelProvider.notifier).addItem(
+          newItem, 
+          imagePath: _processedImageUrl == null ? _imageFile?.path : null, 
+        );
+      }
 
       if (mounted) {
         Navigator.of(context).pop();
@@ -134,6 +163,55 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
       if (mounted) {
         setState(() {
           _isSaving = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteItem() async {
+    if (widget.existingItem == null) return;
+    
+    // Show confirm dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Kıyafeti Sil'),
+        content: const Text('Bu kıyafeti silmek istediğinizden emin misiniz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('İptal'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isDeleting = true;
+    });
+
+    try {
+      await ref.read(wardrobeViewModelProvider.notifier).deleteItem(widget.existingItem!.id);
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeleting = false;
         });
       }
     }
@@ -156,9 +234,9 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yeni Kıyafet Ekle'),
+        title: Text(widget.existingItem != null ? 'Kıyafeti Düzenle' : 'Yeni Kıyafet Ekle'),
       ),
-      body: _isSaving || _isAnalyzing
+      body: _isSaving || _isAnalyzing || _isDeleting
         ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +244,8 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
                 Text(
-                  _isAnalyzing ? 'Yapay zeka inceliyor...\nArka plan siliniyor...' : 'Kaydediliyor...',
+                  _isAnalyzing ? 'Yapay zeka inceliyor...\nArka plan siliniyor...' : 
+                  _isDeleting ? 'Siliniyor...' : 'Kaydediliyor...',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary),
                 ),
@@ -293,8 +372,19 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
                   const SizedBox(height: 32),
                   FilledButton(
                     onPressed: _saveItem,
-                    child: const Text('Kıyafeti Kaydet'),
+                    child: Text(widget.existingItem != null ? 'Güncelle' : 'Kıyafeti Kaydet'),
                   ),
+                  if (widget.existingItem != null) ...[
+                    const SizedBox(height: 16),
+                    TextButton.icon(
+                      onPressed: _deleteItem,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Kıyafeti Sil'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -26,7 +26,19 @@ class ClothingRepository {
       );
       return ClothingItem.fromJson(response.data);
     } catch (e) {
-      throw Exception('Kıyafet eklenemedi: \${_handleError(e)}');
+      throw Exception('Kıyafet eklenemedi: ${_handleError(e)}');
+    }
+  }
+
+  Future<ClothingItem> updateClothingItem(String id, ClothingItem item) async {
+    try {
+      final response = await _apiClient.client.put(
+        '/clothing/$id',
+        data: item.toJson(),
+      );
+      return ClothingItem.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Kıyafet güncellenemedi: ${_handleError(e)}');
     }
   }
 
