@@ -14,6 +14,7 @@ class LaundryItem {
   final int maxWear;
   final IconData icon;
   final LaundryStatus status;
+  final String? imageUrl;
 
   const LaundryItem({
     required this.id,
@@ -23,6 +24,7 @@ class LaundryItem {
     required this.maxWear,
     required this.icon,
     required this.status,
+    this.imageUrl,
   });
 
   LaundryItem copyWith({
@@ -33,6 +35,7 @@ class LaundryItem {
     int? maxWear,
     IconData? icon,
     LaundryStatus? status,
+    String? imageUrl,
   }) {
     return LaundryItem(
       id: id ?? this.id,
@@ -42,27 +45,38 @@ class LaundryItem {
       maxWear: maxWear ?? this.maxWear,
       icon: icon ?? this.icon,
       status: status ?? this.status,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
   factory LaundryItem.fromJson(Map<String, dynamic> json) {
-    // Determine status from string, defaulting to needsWash
-    final statusStr = json['status'] as String?;
-    LaundryStatus parsedStatus = LaundryStatus.needsWash;
-    if (statusStr == 'washing') {
-      parsedStatus = LaundryStatus.washing;
-    } else if (statusStr == 'clean') {
-      parsedStatus = LaundryStatus.clean;
+    // Determine status from string
+    final statusStr = json['status'] as String? ?? 'clean';
+    LaundryStatus parsedStatus;
+    switch (statusStr) {
+      case 'needsWash':
+      case 'needs_wash':
+        parsedStatus = LaundryStatus.needsWash;
+        break;
+      case 'washing':
+        parsedStatus = LaundryStatus.washing;
+        break;
+      default:
+        parsedStatus = LaundryStatus.clean;
     }
+
+    // Get clothing_item image if available
+    final clothingItem = json['clothing_item'] as Map<String, dynamic>?;
 
     return LaundryItem(
       id: json['id'].toString(),
-      name: json['clothing_item']?['name'] as String? ?? 'Bilinmeyen Kıyafet',
-      category: json['clothing_item']?['category'] as String? ?? 'Kategori Yok',
+      name: clothingItem?['name'] as String? ?? json['name'] as String? ?? 'Bilinmeyen Kıyafet',
+      category: clothingItem?['category'] as String? ?? json['category'] as String? ?? 'Kategori Yok',
       wearCount: json['wear_count'] as int? ?? 0,
       maxWear: json['max_wear'] as int? ?? 3,
-      icon: Icons.checkroom, // Can be mapped if needed
+      icon: Icons.checkroom,
       status: parsedStatus,
+      imageUrl: clothingItem?['image_url'] as String?,
     );
   }
 

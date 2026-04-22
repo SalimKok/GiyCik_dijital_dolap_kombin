@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.schemas.outfit import Outfit, OutfitCreate, OutfitUpdate
+from app.schemas.laundry import LaundryItemUpdate
 from app.schemas.user import User
 from app.services import outfit_service
 from app.utils.deps import get_current_user
@@ -100,6 +101,35 @@ async def toggle_favorite(
         raise HTTPException(status_code=404, detail="Outfit not found")
     return outfit
 
+@router.post("/{outfit_id}/wear")
+async def wear_outfit(
+    outfit_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Mark outfit as worn - increments wear count for all clothing items in the outfit."""
+    outfit = await outfit_service.get_outfit(db, outfit_id=outfit_id, user_id=current_user.id)
+    if not outfit:
+        raise HTTPException(status_code=404, detail="Outfit not found")
+    
+    from app.services import laundry_service
+    
+    results = []
+    for item_link in outfit.items:
+        laundry_item = await laundry_service.get_laundry_item_by_clothing(
+            db, clothing_item_id=item_link.clothing_item_id, user_id=current_user.id
+        )
+        if laundry_item:
+            new_wear = laundry_item.wear_count + 1
+            update_data = LaundryItemUpdate(wear_count=new_wear)
+            if new_wear >= laundry_item.max_wear:
+                update_data.status = "needsWash"
+                update_data.wear_count = laundry_item.max_wear
+            await laundry_service.update_laundry_item(db, db_item=laundry_item, item_update=update_data)
+            results.append({"clothing_item_id": item_link.clothing_item_id, "new_wear_count": new_wear})
+    
+    return {"message": "Kombin giyildi!", "updated_items": results}
+
 @router.delete("/{outfit_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_outfit(
     outfit_id: str,
@@ -112,3 +142,4 @@ async def delete_outfit(
         raise HTTPException(status_code=404, detail="Outfit not found")
     await outfit_service.delete_outfit(db, outfit_id=outfit_id, user_id=current_user.id)
     return None
+

@@ -171,11 +171,23 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                                builder: (context) => OutfitRecommendationScreen(editingOutfit: outfit),
                              ),
                            );
+                        } else if (value == 'wear') {
+                           _wearOutfit(context, outfit);
                         } else if (value == 'delete') {
                            _confirmDelete(context, outfit);
                         }
                       },
                       itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'wear',
+                          child: Row(
+                            children: [
+                              Icon(Icons.accessibility_new_rounded, size: 20),
+                              SizedBox(width: 8),
+                              Text('Giydim'),
+                            ],
+                          ),
+                        ),
                         const PopupMenuItem(
                           value: 'edit',
                           child: Row(
@@ -313,5 +325,21 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
         ],
       ),
     );
+  }
+
+  void _wearOutfit(BuildContext context, OutfitItem outfit) {
+    ref.read(outfitsViewModelProvider.notifier).wearOutfit(outfit.id).then((_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${outfit.title} giyildi! Kıyafetlerin giyim sayacı güncellendi.')),
+        );
+      }
+    }).catchError((error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: ${error.toString()}')),
+        );
+      }
+    });
   }
 }

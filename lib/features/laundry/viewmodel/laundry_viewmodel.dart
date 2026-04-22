@@ -80,18 +80,38 @@ class LaundryViewModel extends Notifier<LaundryState> {
     }
   }
 
-  void moveToWashing(String id) {
-    _updateItemStatus(id, 'washing', LaundryStatus.washing);
-  }
-
   void moveToClean(String id) {
     _updateItemStatus(id, 'clean', LaundryStatus.clean, newWearCount: 0);
   }
 
   void moveToNeedsWash(String id) {
-    // Determine maxWear locally for optimistic update, though backend has its own logic
     final item = state.items.firstWhere((i) => i.id == id);
-    _updateItemStatus(id, 'needs_wash', LaundryStatus.needsWash, newWearCount: item.maxWear);
+    _updateItemStatus(id, 'needsWash', LaundryStatus.needsWash, newWearCount: item.maxWear);
+  }
+
+  Future<void> incrementWear(String id) async {
+    final initialItems = state.items;
+    final item = state.items.firstWhere((i) => i.id == id);
+    final newWearCount = item.wearCount + 1;
+    final reachedMax = newWearCount >= item.maxWear;
+
+    // Optimistic update
+    final updated = state.items.map((i) {
+      if (i.id == id) {
+        return i.copyWith(
+          wearCount: reachedMax ? item.maxWear : newWearCount,
+          status: reachedMax ? LaundryStatus.needsWash : i.status,
+        );
+      }
+      return i;
+    }).toList();
+    state = state.copyWith(items: updated);
+
+    try {
+      await _repository.incrementWear(id);
+    } catch (e) {
+      state = state.copyWith(items: initialItems, error: e.toString());
+    }
   }
 }
 

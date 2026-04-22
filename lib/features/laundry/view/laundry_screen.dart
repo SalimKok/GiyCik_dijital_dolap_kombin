@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gircik/core/constants/api_constants.dart';
 import 'package:gircik/data/models/laundry_item.dart';
 import 'package:gircik/features/laundry/viewmodel/laundry_viewmodel.dart';
 
@@ -16,7 +17,7 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -43,18 +44,34 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
           controller: _tabController,
           labelPadding: const EdgeInsets.symmetric(horizontal: 4),
           tabs: [
-            Tab(text: 'Kirliler (${laundryState.needsWashItems.length})', icon: const Icon(Icons.warning_amber_rounded)),
-            Tab(text: 'Yıkanıyor (${laundryState.washingItems.length})', icon: const Icon(Icons.local_laundry_service_rounded)),
-            Tab(text: 'Temiz (${laundryState.cleanItems.length})', icon: const Icon(Icons.check_circle_outline_rounded)),
+            Tab(
+              text: 'Temiz (${laundryState.cleanItems.length})',
+              icon: const Icon(Icons.check_circle_outline_rounded),
+            ),
+            Tab(
+              text: 'Kirli (${laundryState.needsWashItems.length})',
+              icon: const Icon(Icons.warning_amber_rounded),
+            ),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildLaundryList(laundryState.needsWashItems, 'Kirli Sepeti Boş', 'Harika! Yıkanmayı bekleyen kıyafetin yok.', LaundryStatus.needsWash, theme),
-          _buildLaundryList(laundryState.washingItems, 'Makine Boş', 'Şu an yıkanan bir kıyafet bulunmuyor.', LaundryStatus.washing, theme),
-          _buildLaundryList(laundryState.cleanItems, 'Temiz Kıyafet Yok', 'Dolabında giyilmeye hazır kıyafetin kalmamış gibi görünüyor.', LaundryStatus.clean, theme),
+          _buildLaundryList(
+            laundryState.cleanItems,
+            'Temiz Kıyafet Yok',
+            'Dolabında giyilmeye hazır kıyafetin kalmamış gibi görünüyor.',
+            LaundryStatus.clean,
+            theme,
+          ),
+          _buildLaundryList(
+            laundryState.needsWashItems,
+            'Kirli Sepeti Boş',
+            'Harika! Yıkanmayı bekleyen kıyafetin yok.',
+            LaundryStatus.needsWash,
+            theme,
+          ),
         ],
       ),
     );
@@ -69,9 +86,9 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                status == LaundryStatus.needsWash ? Icons.check_circle_outline_rounded :
-                status == LaundryStatus.washing ? Icons.local_laundry_service_rounded :
-                Icons.dry_cleaning_rounded,
+                status == LaundryStatus.needsWash
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.dry_cleaning_rounded,
                 size: 80,
                 color: theme.colorScheme.primary.withValues(alpha: 0.5),
               ),
@@ -105,6 +122,15 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
   }
 
   Widget _buildItemCard(LaundryItem item, LaundryStatus status, ThemeData theme) {
+    // Construct image URL
+    final String? fullImageUrl = item.imageUrl != null && item.imageUrl!.isNotEmpty
+        ? (item.imageUrl!.startsWith('http')
+            ? item.imageUrl!
+            : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
+        : null;
+
+    final wearProgress = item.maxWear > 0 ? item.wearCount / item.maxWear : 0.0;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -115,13 +141,22 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
+            // Clothing image or icon
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: _getIconBackgroundColor(status, theme),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(item.icon, color: _getIconColor(status, theme), size: 28),
+              clipBehavior: Clip.antiAlias,
+              child: fullImageUrl != null
+                  ? Image.network(
+                      fullImageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(item.icon, color: _getIconColor(status, theme), size: 28),
+                    )
+                  : Icon(item.icon, color: _getIconColor(status, theme), size: 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -133,29 +168,35 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
+                  Text(
+                    item.category,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 8),
+                  // Wear progress bar
                   Row(
                     children: [
-                      Text(
-                        item.category,
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: wearProgress,
+                            minHeight: 6,
+                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                            color: wearProgress >= 1.0
+                                ? theme.colorScheme.error
+                                : wearProgress >= 0.66
+                                    ? Colors.orange
+                                    : Colors.green,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        status == LaundryStatus.clean
-                          ? '${item.maxWear - item.wearCount} kullanım kaldı'
-                          : 'Kullanım sınırı doldu',
+                        '${item.wearCount}/${item.maxWear}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: status == LaundryStatus.clean ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error,
-                          fontWeight: status == LaundryStatus.clean ? FontWeight.normal : FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: wearProgress >= 1.0 ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -173,61 +214,59 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
 
   Widget _buildActionButton(LaundryItem item, LaundryStatus status, ThemeData theme) {
     if (status == LaundryStatus.needsWash) {
-      return IconButton.filled(
-        onPressed: () {
-          ref.read(laundryViewModelProvider.notifier).moveToWashing(item.id);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${item.name} yıkamaya eklendi')),
-          );
-        },
-        icon: const Icon(Icons.local_laundry_service_rounded),
-        tooltip: 'Yıkamaya At',
-        style: IconButton.styleFrom(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          foregroundColor: theme.colorScheme.onPrimaryContainer,
-        ),
-      );
-    } else if (status == LaundryStatus.washing) {
-      return IconButton.filled(
+      // In dirty tab → button to mark as clean (washed)
+      return FilledButton.icon(
         onPressed: () {
           ref.read(laundryViewModelProvider.notifier).moveToClean(item.id);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${item.name} temiz olarak işaretlendi')),
+            SnackBar(content: Text('${item.name} yıkandı, temiz olarak işaretlendi')),
           );
         },
-        icon: const Icon(Icons.check_rounded),
-        tooltip: 'Temiz Olarak İşaretle',
-        style: IconButton.styleFrom(
+        icon: const Icon(Icons.check_rounded, size: 18),
+        label: const Text('Yıkandı'),
+        style: FilledButton.styleFrom(
           backgroundColor: Colors.green.shade100,
           foregroundColor: Colors.green.shade800,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
       );
     } else {
-      return IconButton.outlined(
-        onPressed: () {
-          ref.read(laundryViewModelProvider.notifier).moveToNeedsWash(item.id);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${item.name} kirlilere eklendi')),
-          );
-        },
-        icon: const Icon(Icons.water_drop_rounded),
-        tooltip: 'Kirlilere Taşı',
-        style: IconButton.styleFrom(
-          foregroundColor: theme.colorScheme.primary,
-        ),
+      // In clean tab → two actions: "Giydim" (main) and "Kirli" (secondary)
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FilledButton.icon(
+            onPressed: () {
+              final remaining = item.maxWear - item.wearCount - 1;
+              ref.read(laundryViewModelProvider.notifier).incrementWear(item.id);
+              if (remaining <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${item.name} yıkanması gerekiyor!')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${item.name} giyildi • $remaining kullanım kaldı')),
+                );
+              }
+            },
+            icon: const Icon(Icons.accessibility_new_rounded, size: 18),
+            label: const Text('Giydim'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          ),
+        ],
       );
     }
   }
 
   Color _getIconBackgroundColor(LaundryStatus status, ThemeData theme) {
     if (status == LaundryStatus.needsWash) return theme.colorScheme.errorContainer.withValues(alpha: 0.5);
-    if (status == LaundryStatus.washing) return theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
     return Colors.green.shade50;
   }
 
   Color _getIconColor(LaundryStatus status, ThemeData theme) {
     if (status == LaundryStatus.needsWash) return theme.colorScheme.error;
-    if (status == LaundryStatus.washing) return theme.colorScheme.primary;
     return Colors.green.shade700;
   }
 }

@@ -10,14 +10,42 @@ from app.utils.deps import get_current_user
 
 router = APIRouter()
 
-@router.get("/", response_model=List[LaundryItem])
+@router.get("/")
 async def read_laundry_items(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    """Retrieve all laundry items for current user."""
+    """Retrieve all laundry items for current user. Auto-creates records for new clothing items."""
+    # Ensure all clothing items have a laundry record
+    await laundry_service.ensure_laundry_for_user(db, user_id=current_user.id)
+    
     items = await laundry_service.get_laundry_items(db, user_id=current_user.id)
-    return items
+    
+    # Build response with clothing_item info included
+    result = []
+    for item in items:
+        item_dict = {
+            "id": item.id,
+            "user_id": item.user_id,
+            "clothing_item_id": item.clothing_item_id,
+            "name": item.name,
+            "category": item.category,
+            "wear_count": item.wear_count,
+            "max_wear": item.max_wear,
+            "icon_name": item.icon_name,
+            "status": item.status.value if item.status else "clean",
+            "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+            "clothing_item": {
+                "id": item.clothing_item.id,
+                "name": item.clothing_item.name,
+                "category": item.clothing_item.category,
+                "color": item.clothing_item.color,
+                "image_url": item.clothing_item.image_url,
+            } if item.clothing_item else None,
+        }
+        result.append(item_dict)
+    
+    return result
 
 @router.post("/", response_model=LaundryItem)
 async def create_laundry_item(

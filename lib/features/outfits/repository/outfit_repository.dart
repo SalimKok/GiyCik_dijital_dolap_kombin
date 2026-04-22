@@ -42,6 +42,14 @@ class OutfitRepository {
     }
   }
 
+  Future<void> wearOutfit(String outfitId) async {
+    try {
+      await _apiClient.client.post('/outfits/$outfitId/wear');
+    } catch (e) {
+      throw Exception('Kombin giyilemedi: ${_handleError(e)}');
+    }
+  }
+
   Future<Map<String, dynamic>> generateAIOutfit({
     required String season,
     required String weather,
