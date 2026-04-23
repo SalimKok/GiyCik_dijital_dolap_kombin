@@ -26,6 +26,7 @@ class OutfitGenerateRequest(BaseModel):
     weather: str
     event: str
     style: str
+    is_hijab: bool = False
 
 @router.post("/generate", response_model=dict)
 async def generate_outfit_recommendation(
@@ -44,7 +45,14 @@ async def generate_outfit_recommendation(
     if not wardrobe:
         raise HTTPException(status_code=400, detail="Gardırobunuzda hiç eşya yok. Lütfen kombin önerisi almadan önce kıyafet ekleyin.")
 
-    result = vision_service.generate_outfit(wardrobe, request.season, request.weather, request.event, request.style)
+    result = vision_service.generate_outfit(
+        wardrobe, 
+        request.season, 
+        request.weather, 
+        request.event, 
+        request.style,
+        is_hijab=request.is_hijab
+    )
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
     elif not result:

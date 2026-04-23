@@ -55,6 +55,7 @@ class OutfitRepository {
     required String weather,
     required String event,
     required String style,
+    bool isHijab = false,
   }) async {
     try {
       final response = await _apiClient.client.post(
@@ -64,6 +65,7 @@ class OutfitRepository {
           'weather': weather,
           'event': event,
           'style': style,
+          'is_hijab': isHijab,
         },
       );
       return response.data as Map<String, dynamic>;

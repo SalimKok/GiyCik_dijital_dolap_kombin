@@ -22,6 +22,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
   String? _selectedEvent;
   String? _selectedWeather;
   String? _selectedStyle;
+  bool _isHijabStyle = false;
   
   bool _isLoadingRecommendation = false;
   Map<String, String>? _aiRecommendation;
@@ -32,6 +33,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
   String? _manualBottomId;
   String? _manualShoesId;
   String? _manualAccessoryId;
+  String? _manualShawlId;
   bool _isSavingManual = false;
 
   @override
@@ -60,6 +62,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         else if (clothingItem.category == 'Alt Giyim' || clothingItem.category == 'Alt') _manualBottomId = clothingItem.id;
         else if (clothingItem.category == 'Ayakkabı') _manualShoesId = clothingItem.id;
         else if (clothingItem.category == 'Aksesuar') _manualAccessoryId = clothingItem.id;
+        else if (clothingItem.category == 'Şal/Eşarp') _manualShawlId = clothingItem.id;
       }
     }
     setState(() {});
@@ -91,6 +94,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         weather: _selectedWeather!,
         event: _selectedEvent!,
         style: _selectedStyle!,
+        isHijab: _isHijabStyle,
       );
       
       if (mounted) {
@@ -179,7 +183,17 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
             onChanged: (val) => setState(() => _selectedStyle = val),
             icon: Icons.style_rounded,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            title: const Text('Tesettür Kombini Oluştur'),
+            subtitle: const Text('Yapay zeka kombine uygun bir şal/eşarp ekler.'),
+            value: _isHijabStyle,
+            onChanged: (val) => setState(() => _isHijabStyle = val),
+            secondary: const Icon(Icons.checkroom_rounded),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _isLoadingRecommendation ? null : _generateRecommendation,
             style: ElevatedButton.styleFrom(
@@ -263,6 +277,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         _createData(_aiRecommendation!['shoes_id'], 'Ayakkabı'),
         _createData(_aiRecommendation!['outerwear_id'], 'Dış Giyim'),
         _createData(_aiRecommendation!['accessory_id'], 'Aksesuar'),
+        _createData(_aiRecommendation!['shawl_id'], 'Şal/Eşarp'),
       ].whereType<OutfitItemData>().toList();
 
       for (int i = 0; i < items.length; i++) {
@@ -372,6 +387,9 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           const SizedBox(height: 12),
           if (_aiRecommendation!['accessory_id'] != null && _aiRecommendation!['accessory_id'] != 'null' && _aiRecommendation!['accessory_id'] != '')
              _buildOutfitItem(theme, 'Aksesuar', _getItemName(_aiRecommendation!['accessory_id']), Icons.watch_rounded),
+          const SizedBox(height: 12),
+          if (_aiRecommendation!['shawl_id'] != null && _aiRecommendation!['shawl_id'] != 'null' && _aiRecommendation!['shawl_id'] != '')
+             _buildOutfitItem(theme, 'Şal/Eşarp', _getItemName(_aiRecommendation!['shawl_id']), Icons.checkroom_rounded),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -462,6 +480,8 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           _buildManualSelectionBox(theme, 'Ayakkabı', 'Ayakkabı', _manualShoesId, Icons.snowshoeing_rounded, (id) => setState(() => _manualShoesId = id)),
           const SizedBox(height: 16),
           _buildManualSelectionBox(theme, 'Aksesuar', 'Aksesuar', _manualAccessoryId, Icons.watch_rounded, (id) => setState(() => _manualAccessoryId = id)),
+          const SizedBox(height: 16),
+          _buildManualSelectionBox(theme, 'Şal/Eşarp', 'Şal/Eşarp', _manualShawlId, Icons.checkroom_rounded, (id) => setState(() => _manualShawlId = id)),
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: _isSavingManual ? null : _saveManualOutfit,
@@ -517,6 +537,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         _createData(_manualBottomId, 'Alt Giyim'),
         _createData(_manualShoesId, 'Ayakkabı'),
         _createData(_manualAccessoryId, 'Aksesuar'),
+        _createData(_manualShawlId, 'Şal/Eşarp'),
       ].whereType<OutfitItemData>().toList();
 
       for (int i = 0; i < items.length; i++) {

@@ -137,12 +137,14 @@ class OutfitsViewModel extends Notifier<OutfitsState> {
     required String weather,
     required String event,
     required String style,
+    bool isHijab = false,
   }) async {
     return await _repository.generateAIOutfit(
       season: season,
       weather: weather,
       event: event,
       style: style,
+      isHijab: isHijab,
     );
   }
 }

@@ -23,6 +23,7 @@ class WardrobeState {
       'Dış giyim',
       'Ayakkabı',
       'Aksesuar',
+      'Şal/Eşarp',
     ],
     this.error,
   });

@@ -26,7 +26,7 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
   final _colorController = TextEditingController();
   
   String? _selectedCategory = 'Üst';
-  final List<String> _categories = ['Üst', 'Alt', 'Dış giyim', 'Ayakkabı', 'Aksesuar'];
+  final List<String> _categories = ['Üst', 'Alt', 'Dış giyim', 'Ayakkabı', 'Aksesuar', 'Şal/Eşarp'];
   
   String? _selectedSeason = 'Mevsimlik';
   final List<String> _seasons = ['Yazlık', 'Kışlık', 'Mevsimlik'];
