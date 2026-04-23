@@ -52,8 +52,10 @@ async def ensure_laundry_for_user(db: AsyncSession, user_id: int):
     existing_ids = set(result2.scalars().all())
     
     created = 0
+    skipped_categories = ["Şal/Eşarp", "Ayakkabı", "Aksesuar"]
+    
     for cloth in all_clothes:
-        if cloth.id not in existing_ids:
+        if cloth.id not in existing_ids and cloth.category not in skipped_categories:
             db_item = LaundryItem(
                 id=str(uuid.uuid4()),
                 user_id=user_id,
@@ -68,8 +70,16 @@ async def ensure_laundry_for_user(db: AsyncSession, user_id: int):
             db.add(db_item)
             created += 1
     
-    if created > 0:
-        await db.commit()
+    # Clean up: Remove any existing laundry records for these categories that might have been created before
+    from app.models.laundry_item import LaundryItem as LaundryItemModel
+    from sqlalchemy import delete
+    
+    stmt3 = delete(LaundryItemModel).where(
+        LaundryItemModel.user_id == user_id,
+        LaundryItemModel.category.in_(skipped_categories)
+    )
+    await db.execute(stmt3)
+    await db.commit()
     
     return created
 
