@@ -9,6 +9,7 @@ import 'package:gircik/data/models/outfit_item.dart';
 import 'package:gircik/data/models/calendar_event.dart';
 import 'package:gircik/core/providers/navigation_provider.dart';
 import 'package:gircik/core/constants/api_constants.dart';
+import 'package:gircik/core/services/weather_service.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -77,7 +78,7 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 28),
                   _buildSectionTitle(context, 'Bugün'),
                   const SizedBox(height: 12),
-                  _buildTodayCard(context),
+                  _buildTodayCard(context, ref, homeState),
                 ]),
               ),
             ),
@@ -316,37 +317,56 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTodayCard(BuildContext context) {
+  Widget _buildTodayCard(BuildContext context, WidgetRef ref, HomeState state) {
     final theme = Theme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              width: 1,
-            ),
+    final weather = state.weather;
+    final recommendation = state.dailyRecommendation;
+    final wardrobeItems = ref.watch(wardrobeViewModelProvider).items;
+
+    if (weather == null) return const SizedBox.shrink();
+
+    IconData weatherIcon = Icons.wb_sunny_rounded;
+    Color weatherColor = Colors.orange;
+
+    if (weather.condition == 'Yağmurlu') {
+      weatherIcon = Icons.umbrella_rounded;
+      weatherColor = Colors.blue;
+    } else if (weather.condition == 'Bulutlu') {
+      weatherIcon = Icons.cloud_rounded;
+      weatherColor = Colors.grey;
+    } else if (weather.condition == 'Karlı') {
+      weatherIcon = Icons.ac_unit_rounded;
+      weatherColor = Colors.lightBlueAccent;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  color: weatherColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.wb_sunny_rounded,
-                  color: theme.colorScheme.primary,
-                  size: 26,
-                ),
+                child: Icon(weatherIcon, color: weatherColor, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -354,28 +374,140 @@ class HomeScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hava durumuna göre öneri',
-                      style: theme.textTheme.titleMedium,
+                      '${weather.city}, ${weather.temperature.toInt()}°C',
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 4),
                     Text(
-                      'Bugünkü havaya uygun kombin önerisi al',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontSize: 13,
-                      ),
+                      weather.condition,
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.lightbulb_outline_rounded, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    weather.advice,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Divider(height: 1),
+          const SizedBox(height: 20),
+          
+          if (recommendation == null)
+            state.isRecommendationLoading
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () => ref.read(homeViewModelProvider.notifier).getDailyRecommendation(),
+                    icon: const Icon(Icons.auto_awesome_rounded),
+                    label: const Text('Bugünün Kombinini Öner'),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      foregroundColor: theme.colorScheme.onPrimaryContainer,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                )
+          else
+            _buildRecommendationPreview(context, ref, recommendation, wardrobeItems),
+        ],
       ),
+    );
+  }
+
+  Widget _buildRecommendationPreview(
+    BuildContext context, 
+    WidgetRef ref, 
+    Map<String, dynamic> recommendation,
+    List<dynamic> wardrobeItems
+  ) {
+    final theme = Theme.of(context);
+    
+    // ID'leri topla
+    final ids = [
+      recommendation['top_id'],
+      recommendation['bottom_id'],
+      recommendation['outerwear_id'],
+      recommendation['shoes_id'],
+      recommendation['shawl_id'],
+    ].where((id) => id != null).cast<String>().toList();
+
+    final matchedClothes = ids.map((id) {
+      return wardrobeItems.where((w) => w.id == id).firstOrNull;
+    }).where((item) => item != null).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Önerilen Kombin',
+          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 80,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: matchedClothes.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final item = matchedClothes[index];
+              final String? imageUrl = item?.imageUrl != null && item!.imageUrl!.isNotEmpty
+                  ? (item.imageUrl!.startsWith('http') 
+                      ? item.imageUrl! 
+                      : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
+                  : null;
+
+              return Container(
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: imageUrl != null 
+                  ? Image.network(imageUrl, fit: BoxFit.cover)
+                  : _buildOutfitPlaceholder(theme),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          recommendation['description'] ?? 'Harika bir kombin!',
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
