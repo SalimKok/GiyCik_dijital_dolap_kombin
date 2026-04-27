@@ -96,3 +96,10 @@ async def update_laundry_item(db: AsyncSession, db_item: LaundryItem, item_updat
     await db.refresh(db_item)
     return db_item
 
+async def update_all_max_wear(db: AsyncSession, user_id: int, max_wear: int):
+    from sqlalchemy import update
+    stmt = update(LaundryItem).where(LaundryItem.user_id == user_id).values(max_wear=max_wear)
+    await db.execute(stmt)
+    await db.commit()
+    return True
+

@@ -113,3 +113,13 @@ async def increment_wear(
         )
         
     return updated_laundry
+
+@router.patch("/max-wear")
+async def update_all_max_wear(
+    max_wear: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Update max_wear for all laundry items of current user."""
+    await laundry_service.update_all_max_wear(db, user_id=current_user.id, max_wear=max_wear)
+    return {"status": "success"}

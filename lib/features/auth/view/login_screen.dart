@@ -1,31 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/features/auth/view/register_screen.dart';
-import 'package:gircik/core/main_layout_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gircik/features/auth/viewmodel/auth_viewmodel.dart';
 
-/// Giriş ekranı: e-posta ve şifre ile giriş, kayıt sayfasına geçiş.
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({
-    super.key,
-    required this.onLoginSuccess,
-  });
-
-  final VoidCallback onLoginSuccess;
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _LoginBody(onLoginSuccess: onLoginSuccess),
+    return const Scaffold(
+      body: _LoginBody(),
     );
   }
 }
 
 class _LoginBody extends ConsumerStatefulWidget {
-  const _LoginBody({required this.onLoginSuccess});
-
-  final VoidCallback onLoginSuccess;
+  const _LoginBody();
 
   @override
   ConsumerState<_LoginBody> createState() => _LoginBodyState();
@@ -90,11 +81,7 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
     
     if (success) {
       await _saveRememberMe(_rememberMe, _emailController.text.trim());
-      if (!mounted) return;
-      widget.onLoginSuccess();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
-      );
+      // No need to navigate here, AppStartScreen will catch the state change
     } else {
       final error = ref.read(authViewModelProvider).error;
       if (error != null) {
@@ -108,16 +95,7 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
   void _goToRegister() {
     Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => RegisterScreen(
-          onRegisterSuccess: () {
-            Navigator.of(context).pop();
-            widget.onLoginSuccess();
-            if (!context.mounted) return;
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
-            );
-          },
-        ),
+        builder: (_) => const RegisterScreen(),
       ),
     );
   }

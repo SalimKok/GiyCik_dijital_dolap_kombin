@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.user import User, UserCreate
+from app.schemas.user import User, UserCreate, UserUpdate
 from app.schemas.token import Token
 from app.services import auth_service
 from app.utils.security import verify_password, create_access_token
@@ -45,3 +45,19 @@ async def read_users_me(
     current_user: Annotated[User, Depends(get_current_user)]
 ) -> User:
     return current_user
+
+@router.put("/me", response_model=User)
+async def update_user_me(
+    user_in: UserUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> User:
+    return await auth_service.update_user(db, db_user=current_user, user_in=user_in)
+
+@router.delete("/me")
+async def delete_user_me(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> dict:
+    await auth_service.delete_user(db, db_user=current_user)
+    return {"status": "success"}

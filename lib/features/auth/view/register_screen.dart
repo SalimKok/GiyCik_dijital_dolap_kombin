@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gircik/core/main_layout_screen.dart';
 import 'package:gircik/features/auth/viewmodel/auth_viewmodel.dart';
 
-/// Kayıt ekranı: ad, e-posta ve şifre ile yeni hesap oluşturma.
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({
-    super.key,
-    required this.onRegisterSuccess,
-  });
-
-  final VoidCallback onRegisterSuccess;
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +11,13 @@ class RegisterScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Kayıt Ol'),
       ),
-      body: _RegisterBody(onRegisterSuccess: onRegisterSuccess),
+      body: const _RegisterBody(),
     );
   }
 }
 
 class _RegisterBody extends ConsumerStatefulWidget {
-  const _RegisterBody({required this.onRegisterSuccess});
-
-  final VoidCallback onRegisterSuccess;
+  const _RegisterBody();
 
   @override
   ConsumerState<_RegisterBody> createState() => _RegisterBodyState();
@@ -59,12 +50,8 @@ class _RegisterBodyState extends ConsumerState<_RegisterBody> {
     if (!mounted) return;
     
     if (success) {
-      widget.onRegisterSuccess();
-      if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => const MainLayoutScreen()),
-        (route) => false,
-      );
+      // No need to navigate, AppStartScreen will handle it
+      Navigator.of(context).pop(); // Go back to login which will then be replaced by home
     } else {
       final error = ref.read(authViewModelProvider).error;
       if (error != null) {

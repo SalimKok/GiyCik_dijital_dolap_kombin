@@ -4,6 +4,12 @@ import 'package:gircik/theme/theme_provider.dart';
 import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.dart';
 import 'package:gircik/features/subscription/view/pro_paywall_screen.dart';
 import 'package:gircik/data/models/subscription.dart';
+import 'package:gircik/features/settings/viewmodel/settings_viewmodel.dart';
+import 'package:gircik/features/auth/repository/auth_repository.dart';
+import 'package:gircik/core/providers/navigation_provider.dart';
+
+import '../../../core/app_start_screen.dart';
+import '../../auth/viewmodel/auth_viewmodel.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,6 +19,8 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
     final subscription = ref.watch(subscriptionProvider);
+    final settings = ref.watch(settingsViewModelProvider);
+    final settingsNotifier = ref.read(settingsViewModelProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,9 +59,12 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.notifications_rounded,
                 iconColor: Colors.blue,
-                title: 'Bildirimler',
+                title: 'Genel Bildirimler',
                 subtitle: 'Uygulama bildirimlerini yönet',
-                trailing: Switch(value: true, onChanged: (_) {}),
+                trailing: Switch(
+                  value: settings.notificationsEnabled, 
+                  onChanged: settingsNotifier.setNotificationsEnabled,
+                ),
               ),
               const _SettingsDivider(),
               _SettingsTile(
@@ -61,7 +72,10 @@ class SettingsScreen extends ConsumerWidget {
                 iconColor: Colors.teal,
                 title: 'Yıkama Hatırlatıcısı',
                 subtitle: 'Kullanım sınırı dolunca bildir',
-                trailing: Switch(value: true, onChanged: (_) {}),
+                trailing: Switch(
+                  value: settings.laundryReminderEnabled, 
+                  onChanged: settingsNotifier.setLaundryReminderEnabled,
+                ),
               ),
               const _SettingsDivider(),
               _SettingsTile(
@@ -69,7 +83,10 @@ class SettingsScreen extends ConsumerWidget {
                 iconColor: Colors.orange,
                 title: 'Etkinlik Hatırlatıcısı',
                 subtitle: 'Yaklaşan etkinliklerden önce bildir',
-                trailing: Switch(value: true, onChanged: (_) {}),
+                trailing: Switch(
+                  value: settings.eventReminderEnabled, 
+                  onChanged: settingsNotifier.setEventReminderEnabled,
+                ),
               ),
             ],
           ),
@@ -92,23 +109,14 @@ class SettingsScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '3 kez',
+                    '${settings.defaultUsageLimit} kez',
                     style: TextStyle(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                onTap: () {},
-              ),
-              const _SettingsDivider(),
-              _SettingsTile(
-                icon: Icons.category_rounded,
-                iconColor: Colors.indigo,
-                title: 'Kategorileri Düzenle',
-                subtitle: 'Kıyafet kategorilerini özelleştir',
-                trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
+                onTap: () => _showUsageLimitDialog(context, ref, settings.defaultUsageLimit),
               ),
             ],
           ),
@@ -123,9 +131,9 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.person_rounded,
                 iconColor: Colors.green,
                 title: 'Profil Bilgileri',
-                subtitle: 'Ad, e-posta ve fotoğraf',
+                subtitle: 'Ad ve e-posta adresini güncelle',
                 trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
+                onTap: () => _showProfileDialog(context, ref),
               ),
               const _SettingsDivider(),
               _SettingsTile(
@@ -134,7 +142,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: 'Şifre Değiştir',
                 subtitle: 'Hesap güvenliğini güncelle',
                 trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
+                onTap: () => _showChangePasswordDialog(context, ref),
               ),
             ],
           ),
@@ -146,21 +154,19 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsCard(
             children: [
               _SettingsTile(
-                icon: Icons.cloud_upload_rounded,
-                iconColor: Colors.cyan,
-                title: 'Yedekleme',
-                subtitle: 'Verilerini buluta yedekle',
-                trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
-              ),
-              const _SettingsDivider(),
-              _SettingsTile(
                 icon: Icons.delete_sweep_rounded,
                 iconColor: Colors.red,
                 title: 'Önbelleği Temizle',
-                subtitle: 'Geçici dosyaları sil',
+                subtitle: 'Kombin önerilerini sıfırla',
                 trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
+                onTap: () async {
+                  await settingsNotifier.clearCache();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Önbellek temizlendi')),
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -185,59 +191,224 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: Icon(Icons.open_in_new_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
                 onTap: () {},
               ),
-              const _SettingsDivider(),
-              _SettingsTile(
-                icon: Icons.gavel_rounded,
-                iconColor: Colors.grey,
-                title: 'Kullanım Koşulları',
-                trailing: Icon(Icons.open_in_new_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
-              ),
             ],
           ),
 
           const SizedBox(height: 32),
 
-          // ── Çıkış ──
+          // ── Çıkış & Silme ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Çıkış Yap'),
-                    content: const Text('Hesabından çıkış yapmak istediğine emin misin?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('İptal'),
-                      ),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // TODO: Gerçek çıkış mantığı eklenecek
-                        },
-                        child: const Text('Çıkış Yap'),
-                      ),
-                    ],
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showLogoutDialog(context, ref),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.4)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.logout_rounded),
+                    label: const Text('Çıkış Yap'),
                   ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
-                side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.4)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
                 ),
-              ),
-              icon: const Icon(Icons.logout_rounded),
-              label: const Text('Çıkış Yap'),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => _showDeleteAccountDialog(context, ref),
+                  child: Text(
+                    'Hesabımı Kalıcı Olarak Sil',
+                    style: TextStyle(color: theme.colorScheme.error.withValues(alpha: 0.7), fontSize: 13),
+                  ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  void _showUsageLimitDialog(BuildContext context, WidgetRef ref, int currentLimit) {
+    final controller = TextEditingController(text: currentLimit.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Kullanım Sınırı'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Kıyafetler kaç kez giyildikten sonra yıkama listesine eklensin?',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Kullanım Sayısı',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                suffixText: 'kez',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          FilledButton(
+            onPressed: () {
+              final newVal = int.tryParse(controller.text);
+              if (newVal != null && newVal > 0) {
+                ref.read(settingsViewModelProvider.notifier).setDefaultUsageLimit(newVal);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Uygula'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showProfileDialog(BuildContext context, WidgetRef ref) async {
+    final user = await ref.read(authRepositoryProvider).getCurrentUser();
+    final nameController = TextEditingController(text: user.name);
+    final emailController = TextEditingController(text: user.email);
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Profil Bilgileri'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Ad Soyad'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'E-posta'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(authRepositoryProvider).updateProfile(
+                  name: nameController.text,
+                  email: emailController.text,
+                );
+                if (context.mounted) Navigator.pop(context);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              }
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context, WidgetRef ref) {
+    final passController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Şifre Değiştir'),
+        content: TextField(
+          controller: passController,
+          decoration: const InputDecoration(labelText: 'Yeni Şifre'),
+          obscureText: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(authRepositoryProvider).updateProfile(password: passController.text);
+                if (context.mounted) Navigator.pop(context);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              }
+            },
+            child: const Text('Güncelle'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Çıkış Yap'),
+        content: const Text('Hesabından çıkış yapmak istediğine emin misin?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          FilledButton(
+            onPressed: () async {
+              await ref.read(authViewModelProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const AppStartScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: const Text('Çıkış Yap'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hesabı Sil', style: TextStyle(color: Colors.red)),
+        content: const Text('Bu işlem geri alınamaz. Tüm verilerin kalıcı olarak silinecektir. Onaylıyor musun?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Vazgeç')),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(authViewModelProvider.notifier).deleteAccount();
+                if (context.mounted) {
+                  Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const AppStartScreen()),
+                    (route) => false,
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Silmeyi Onayla'),
+          ),
         ],
       ),
     );

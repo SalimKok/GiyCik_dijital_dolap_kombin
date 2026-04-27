@@ -80,16 +80,10 @@ class HomeViewModel extends Notifier<HomeState> {
   Future<void> loadHomeData() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // 1. Temel verileri paralel olarak çek (Kullanıcı, Çamaşır, Takvim)
-      final results = await Future.wait([
-        _authRepo.getCurrentUser(),
-        _laundryRepo.getLaundryItems(),
-        _calendarRepo.getEvents(),
-      ]);
-
-      final user = results[0] as dynamic; // User
-      final laundryItems = results[1] as List<dynamic>; // List<LaundryItem>
-      final calendarEvents = results[2] as List<dynamic>; // List<CalendarEvent>
+      final user = await _authRepo.getCurrentUser();
+      final laundryItems = await _laundryRepo.getLaundryItems();
+      final calendarEvents = await _calendarRepo.getEvents();
+      final weather = await _weatherService.getCurrentWeather();
 
       final needsWashCount = laundryItems.where((i) => i.status.name == 'needsWash').length;
       
@@ -109,36 +103,23 @@ class HomeViewModel extends Notifier<HomeState> {
         } else if (diff.inDays == 1) {
           nextEventTime = 'Yarın:';
         } else {
-          nextEventTime = '${diff.inDays} gün sonra:';
+          nextEventTime = '\${diff.inDays} gün sonra:';
         }
       }
 
-      // 2. Ana ekranı hemen güncelle (Hava durumu henüz yüklenmemiş olsa bile)
       state = state.copyWith(
         isLoading: false,
         userName: user.name,
         laundryCount: needsWashCount,
         nextEventTitle: nextEventTitle,
         nextEventTime: nextEventTime,
+        weather: weather,
       );
 
-      // 3. Hava durumunu arka planda yükle
-      _loadWeatherInBackground();
-
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
-  }
-
-  Future<void> _loadWeatherInBackground() async {
-    try {
-      final weather = await _weatherService.getCurrentWeather();
-      state = state.copyWith(weather: weather);
-      
-      // Hava durumu gelince cache kontrolü yap
+      // Check cache after data is loaded
       await _checkAndLoadCache();
     } catch (e) {
-      print('Background Weather Error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

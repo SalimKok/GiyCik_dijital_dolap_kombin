@@ -35,7 +35,18 @@ class LaundryRepository {
       final response = await _apiClient.client.patch('/laundry/$id/wear');
       return LaundryItem.fromJson(response.data);
     } catch (e) {
-      throw Exception('Giyim sayısı artırılamadı: \${_handleError(e)}');
+      throw Exception('Giyim sayısı artırılamadı: ${_handleError(e)}');
+    }
+  }
+
+  Future<void> updateAllMaxWear(int maxWear) async {
+    try {
+      await _apiClient.client.patch(
+        '/laundry/max-wear',
+        queryParameters: {'max_wear': maxWear},
+      );
+    } catch (e) {
+      throw Exception('Kullanım sınırı güncellenemedi: ${_handleError(e)}');
     }
   }
 

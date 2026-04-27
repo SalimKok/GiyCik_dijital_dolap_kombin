@@ -56,6 +56,31 @@ class AuthRepository {
     await _apiClient.clearToken();
   }
 
+  Future<User> updateProfile({String? name, String? email, String? password}) async {
+    try {
+      final response = await _apiClient.client.put(
+        '/auth/me',
+        data: {
+          if (name != null) 'name': name,
+          if (email != null) 'email': email,
+          if (password != null) 'password': password,
+        },
+      );
+      return User.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Profil güncellenemedi: ${_handleError(e)}');
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      await _apiClient.client.delete('/auth/me');
+      await logout();
+    } catch (e) {
+      throw Exception('Hesap silinemedi: ${_handleError(e)}');
+    }
+  }
+
   String _handleError(dynamic error) {
     if (error is DioException) {
       if (error.response?.data != null && error.response?.data['detail'] != null) {
