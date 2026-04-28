@@ -7,10 +7,10 @@ enum SubscriptionPlan {
 
 /// Ücretsiz kullanıcılar için kullanım sınırları.
 class FreeLimits {
-  static const int maxClothingItems = 3;
-  static const int maxOutfits = 2;
-  static const int maxTotalAIRecommendations = 3;
-  static const int maxCalendarEvents = 1;
+  static const int maxClothingItems = 10;
+  static const int maxOutfits = 10;
+  static const int maxTotalAIRecommendations = 10;
+  static const int maxCalendarEvents = 10;
 }
 
 /// Kullanıcının abonelik durumunu temsil eder.

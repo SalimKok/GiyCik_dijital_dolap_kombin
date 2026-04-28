@@ -32,6 +32,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
   // Manual Form state
   final _manualTitleController = TextEditingController();
   String? _manualTopId;
+  String? _manualOuterwearId;
   String? _manualBottomId;
   String? _manualShoesId;
   String? _manualAccessoryId;
@@ -87,6 +88,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
       final clothingItem = wardrobeState.items.where((w) => w.id == outfitItem.clothingItemId).firstOrNull;
       if (clothingItem != null) {
         if (clothingItem.category == 'Üst Giyim' || clothingItem.category == 'Üst') _manualTopId = clothingItem.id;
+        else if (clothingItem.category == 'Dış Giyim' || clothingItem.category == 'Dış giyim') _manualOuterwearId = clothingItem.id;
         else if (clothingItem.category == 'Alt Giyim' || clothingItem.category == 'Alt') _manualBottomId = clothingItem.id;
         else if (clothingItem.category == 'Ayakkabı') _manualShoesId = clothingItem.id;
         else if (clothingItem.category == 'Aksesuar') _manualAccessoryId = clothingItem.id;
@@ -503,6 +505,8 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           const SizedBox(height: 24),
           _buildManualSelectionBox(theme, 'Üst Giyim', 'Üst', _manualTopId, Icons.dry_cleaning_rounded, (id) => setState(() => _manualTopId = id)),
           const SizedBox(height: 16),
+          _buildManualSelectionBox(theme, 'Dış Giyim', 'Dış giyim', _manualOuterwearId, Icons.dry_cleaning, (id) => setState(() => _manualOuterwearId = id)),
+          const SizedBox(height: 16),
           _buildManualSelectionBox(theme, 'Alt Giyim', 'Alt', _manualBottomId, Icons.airline_seat_legroom_normal_rounded, (id) => setState(() => _manualBottomId = id)),
           const SizedBox(height: 16),
           _buildManualSelectionBox(theme, 'Ayakkabı', 'Ayakkabı', _manualShoesId, Icons.snowshoeing_rounded, (id) => setState(() => _manualShoesId = id)),
@@ -537,7 +541,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
       return;
     }
 
-    if (_manualTopId == null && _manualBottomId == null && _manualShoesId == null && _manualAccessoryId == null) {
+    if (_manualTopId == null && _manualBottomId == null && _manualShoesId == null && _manualAccessoryId == null && _manualOuterwearId == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kombine en az bir parça ekleyin.')));
       return;
     }
@@ -562,6 +566,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
 
       final items = [
         _createData(_manualTopId, 'Üst Giyim'),
+        _createData(_manualOuterwearId, 'Dış Giyim'),
         _createData(_manualBottomId, 'Alt Giyim'),
         _createData(_manualShoesId, 'Ayakkabı'),
         _createData(_manualAccessoryId, 'Aksesuar'),
