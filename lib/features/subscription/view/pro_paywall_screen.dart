@@ -176,6 +176,12 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                 subtitle: 'Kişiselleştirilmiş akıllı bildirimler',
                 theme: theme,
               ),
+              _FeatureItem(
+                icon: Icons.analytics_rounded,
+                title: 'Analitik ve İçgörüler',
+                subtitle: 'Gardırobuna dair detaylı istatistikler ve analizler',
+                theme: theme,
+              ),
               const SizedBox(height: 32),
 
               // ── Plan seçimi ──
