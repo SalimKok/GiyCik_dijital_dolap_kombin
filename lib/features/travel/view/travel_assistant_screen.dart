@@ -4,6 +4,10 @@ import 'package:gircik/features/travel/viewmodel/travel_viewmodel.dart';
 import 'package:gircik/features/travel/view/create_travel_screen.dart';
 import 'package:gircik/features/travel/view/travel_detail_screen.dart';
 import 'package:gircik/data/models/travel_plan.dart';
+import 'package:uuid/uuid.dart';
+import 'package:gircik/data/models/calendar_event.dart';
+import 'package:gircik/features/style_calendar/viewmodel/style_calendar_viewmodel.dart';
+import 'package:gircik/features/home/viewmodel/home_viewmodel.dart';
 
 class TravelAssistantScreen extends ConsumerWidget {
   const TravelAssistantScreen({super.key});
@@ -102,6 +106,11 @@ class TravelAssistantScreen extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
+                    icon: const Icon(Icons.edit_calendar_rounded, color: Colors.blue),
+                    onPressed: () => _addToCalendar(context, ref, plan),
+                    tooltip: 'Takvime Ekle',
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
                     onPressed: () {
                       _showDeleteDialog(context, ref, plan.id);
@@ -157,5 +166,51 @@ class TravelAssistantScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _addToCalendar(BuildContext context, WidgetRef ref, TravelPlan plan) async {
+    try {
+      final startDate = DateTime.parse(plan.startDate);
+      final endDate = DateTime.parse(plan.endDate);
+      final days = endDate.difference(startDate).inDays + 1;
+      
+      final calendarNotifier = ref.read(styleCalendarViewModelProvider.notifier);
+      int addedCount = 0;
+      
+      for (int i = 0; i < days; i++) {
+        final currentDay = startDate.add(Duration(days: i));
+        final title = '✈️ ${plan.destination} Seyahati (${i + 1}. Gün)';
+        
+        final latestState = ref.read(styleCalendarViewModelProvider);
+        final alreadyExists = latestState.events.any((e) => 
+            e.title == title && e.date.difference(currentDay).inHours.abs() <= 36
+        );
+        
+        if (!alreadyExists) {
+          final newEvent = CalendarEvent(
+            id: const Uuid().v4(),
+            date: currentDay,
+            title: title,
+          );
+          await calendarNotifier.addEvent(newEvent);
+          addedCount++;
+        }
+      }
+      
+      if (addedCount > 0) {
+        ref.read(homeViewModelProvider.notifier).loadHomeData();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$addedCount günlük seyahat takvime eklendi.')));
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bu seyahat zaten takvimde mevcut.')));
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      }
+    }
   }
 }

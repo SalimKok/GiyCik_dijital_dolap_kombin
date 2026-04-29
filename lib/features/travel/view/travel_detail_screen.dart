@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gircik/data/models/travel_plan.dart';
 import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:uuid/uuid.dart';
+import 'package:gircik/data/models/calendar_event.dart';
+import 'package:gircik/features/style_calendar/viewmodel/style_calendar_viewmodel.dart';
+import 'package:gircik/features/home/viewmodel/home_viewmodel.dart';
 class TravelDetailScreen extends ConsumerWidget {
   final TravelPlan plan;
 
@@ -19,12 +22,34 @@ class TravelDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(plan.destination),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_calendar_rounded),
+            tooltip: 'Takvime Ekle',
+            onPressed: () => _addToCalendar(context, ref, plan),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _addToCalendar(context, ref, plan),
+                icon: const Icon(Icons.calendar_month_rounded),
+                label: const Text('Bu Seyahati Takvime Ekle'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             if (summary.isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(16),
@@ -151,5 +176,54 @@ class TravelDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _addToCalendar(BuildContext context, WidgetRef ref, TravelPlan plan) async {
+    try {
+      final startDate = DateTime.parse(plan.startDate);
+      final endDate = DateTime.parse(plan.endDate);
+      final days = endDate.difference(startDate).inDays + 1;
+      
+      final calendarNotifier = ref.read(styleCalendarViewModelProvider.notifier);
+      int addedCount = 0;
+      
+      for (int i = 0; i < days; i++) {
+        final currentDay = startDate.add(Duration(days: i));
+        final title = '✈️ ${plan.destination} Seyahati (${i + 1}. Gün)';
+        
+        // Yenilenmiş state'i her adımda okuyarak hızlı çift tıklamaları ve önceki eklemeleri yakala
+        final latestState = ref.read(styleCalendarViewModelProvider);
+        
+        // Timezone farklılıklarından dolayı tarihler kaymış olabilir, sadece başlığa ve yakın tarihe bakıyoruz.
+        final alreadyExists = latestState.events.any((e) => 
+            e.title == title && e.date.difference(currentDay).inHours.abs() <= 36
+        );
+        
+        if (!alreadyExists) {
+          final newEvent = CalendarEvent(
+            id: const Uuid().v4(),
+            date: currentDay,
+            title: title,
+          );
+          await calendarNotifier.addEvent(newEvent);
+          addedCount++;
+        }
+      }
+      
+      if (addedCount > 0) {
+        ref.read(homeViewModelProvider.notifier).loadHomeData();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$addedCount günlük seyahat takvime eklendi.')));
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bu seyahat zaten takvimde mevcut.')));
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      }
+    }
   }
 }
