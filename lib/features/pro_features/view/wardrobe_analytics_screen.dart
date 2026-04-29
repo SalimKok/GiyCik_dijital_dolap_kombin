@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:gircik/data/models/clothing_item.dart';
+import 'package:gircik/core/constants/api_constants.dart';
 import 'dart:io';
 
 class WardrobeAnalyticsScreen extends ConsumerWidget {
@@ -154,6 +155,12 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
   }
 
   Widget _buildClothingCard(ThemeData theme, ClothingItem item, {required bool isTop}) {
+    final String? fullImageUrl = item.imageUrl != null && item.imageUrl!.isNotEmpty
+        ? (item.imageUrl!.startsWith('http') 
+            ? item.imageUrl 
+            : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
+        : null;
+
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 16),
@@ -168,10 +175,15 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                  ? (item.imageUrl!.startsWith('http')
-                      ? Image.network(item.imageUrl!, fit: BoxFit.cover)
-                      : Image.file(File(item.imageUrl!), fit: BoxFit.cover))
+              child: fullImageUrl != null
+                  ? Image.network(
+                      fullImageUrl, 
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Icon(Icons.checkroom, color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    )
                   : Container(
                       color: theme.colorScheme.surfaceContainerHighest,
                       child: Icon(Icons.checkroom, color: theme.colorScheme.onSurfaceVariant),
