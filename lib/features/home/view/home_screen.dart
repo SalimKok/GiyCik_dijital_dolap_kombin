@@ -129,7 +129,7 @@ class HomeScreen extends ConsumerWidget {
             subtitle: laundryCount > 0 
               ? '$laundryCount kıyafet' 
               : 'Yok',
-            color: Colors.blue,
+            color: Theme.of(context).colorScheme.primary,
             onTap: () {
               // Hijyen sekmesi index 5
               ref.read(mainNavIndexProvider.notifier).navigate(5);
@@ -142,7 +142,7 @@ class HomeScreen extends ConsumerWidget {
             icon: Icons.event_rounded,
             title: 'Yaklaşan Etkinlik',
             subtitle: nextEvent != null ? '$nextEventTime $nextEventTitle' : 'Yok',
-            color: Colors.orange,
+            color: Theme.of(context).colorScheme.primary,
             onTap: nextEvent != null ? () {
               // Takvim sekmesi index 3, ilgili günü seç
               ref.read(styleCalendarViewModelProvider.notifier)
@@ -174,7 +174,7 @@ class HomeScreen extends ConsumerWidget {
     return ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: favorites.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 14),
+        separatorBuilder: (context, index) => const SizedBox(width: 6),
         itemBuilder: (context, index) {
           final outfit = favorites[index];
 
@@ -196,13 +196,13 @@ class HomeScreen extends ConsumerWidget {
               color: theme.cardTheme.color,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                color: theme.colorScheme.primary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 15,
+                  color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
+                  blurRadius: 22,
                   offset: const Offset(0, 6),
                 ),
               ],
@@ -213,14 +213,14 @@ class HomeScreen extends ConsumerWidget {
                 onTap: () {},
                 borderRadius: BorderRadius.circular(18),
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Fotoğraf bölümü
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           child: outfitImages.isNotEmpty
                               ? Stack(
                                   fit: StackFit.expand,
@@ -246,8 +246,9 @@ class HomeScreen extends ConsumerWidget {
                                                   width: 30,
                                                   height: 36,
                                                   decoration: BoxDecoration(
+                                                    color: theme.colorScheme.surfaceContainerHighest,
                                                     borderRadius: BorderRadius.circular(6),
-                                                    border: Border.all(color: Colors.white, width: 1.5),
+                                                    border: Border.all(color: theme.colorScheme.surface, width: 1.5),
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: Colors.black.withValues(alpha: 0.2),
@@ -266,8 +267,8 @@ class HomeScreen extends ConsumerWidget {
                                       ),
                                     // Favori ikonlu üst sol rozet
                                     Positioned(
-                                      top: 6,
-                                      left: 6,
+                                      top: 3,
+                                      left: 3,
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
@@ -364,17 +365,17 @@ class HomeScreen extends ConsumerWidget {
     }
 
     IconData weatherIcon = Icons.wb_sunny_rounded;
-    Color weatherColor = Colors.orange;
+    Color weatherColor = theme.colorScheme.primary;
 
     if (weather.condition == 'Yağmurlu') {
       weatherIcon = Icons.umbrella_rounded;
-      weatherColor = Colors.blue;
+      weatherColor = theme.colorScheme.onSurfaceVariant;
     } else if (weather.condition == 'Bulutlu') {
       weatherIcon = Icons.cloud_rounded;
-      weatherColor = Colors.grey;
+      weatherColor = theme.colorScheme.onSurfaceVariant;
     } else if (weather.condition == 'Karlı') {
       weatherIcon = Icons.ac_unit_rounded;
-      weatherColor = Colors.lightBlueAccent;
+      weatherColor = theme.colorScheme.onSurfaceVariant;
     }
 
     return Container(
@@ -385,24 +386,19 @@ class HomeScreen extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: [
             theme.colorScheme.surface,
-            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            theme.colorScheme.surfaceContainerHighest,
           ],
         ),
         borderRadius: BorderRadius.circular(20), // Daha da küçültüldü
         border: Border.all(
-          color: weatherColor.withValues(alpha: 0.25),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: weatherColor.withValues(alpha: 0.12),
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 25,
             offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -419,13 +415,6 @@ class HomeScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: weatherColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: weatherColor.withValues(alpha: 0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: Icon(weatherIcon, color: weatherColor, size: 20), // Daha da küçültüldü
                   ),
@@ -631,27 +620,24 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      color: theme.cardTheme.color,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: color.withValues(alpha: 0.2),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),

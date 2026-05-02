@@ -132,10 +132,9 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
     final wearProgress = item.maxWear > 0 ? item.wearCount / item.maxWear : 0.0;
 
     return Card(
-      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

@@ -161,12 +161,12 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16), // Biraz daha keskin
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.2), // Belirgin border
+          color: theme.colorScheme.primary.withValues(alpha: 0.3), // Lüks altın sınır
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05), // Göze batmayan ama belirgin gölge
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15), // Altın/tema yansımalı gölge
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

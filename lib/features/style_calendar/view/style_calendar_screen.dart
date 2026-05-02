@@ -71,7 +71,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -152,7 +152,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -228,7 +228,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -248,7 +248,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
                   ),
                   child: Icon(
                     linkedOutfit != null ? Icons.checkroom_rounded : Icons.event_note_rounded,
-                    color: theme.colorScheme.primary,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -473,7 +473,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
                                     border: Border.all(
                                       color: isSelected
                                           ? Theme.of(ctx2).colorScheme.primary
-                                          : Theme.of(ctx2).colorScheme.outline.withValues(alpha: 0.2),
+                                          : Theme.of(ctx2).colorScheme.primary.withValues(alpha: 0.3),
                                       width: isSelected ? 2.5 : 1.5,
                                     ),
                                     color: isSelected

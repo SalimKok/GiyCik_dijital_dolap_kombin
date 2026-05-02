@@ -85,7 +85,10 @@ class TravelAssistantScreen extends ConsumerWidget {
   Widget _buildPlanCard(BuildContext context, ThemeData theme, TravelPlan plan, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => TravelDetailScreen(plan: plan)));

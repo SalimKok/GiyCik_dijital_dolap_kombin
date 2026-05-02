@@ -117,14 +117,14 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16), // Küçültüldü
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.amber.shade700, Colors.orange.shade800],
+          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20), // Küçültüldü
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withValues(alpha: 0.3),
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -173,7 +173,14 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16), // Küçültüldü
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -242,10 +249,10 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -278,7 +285,7 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: percentage,
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    color: Colors.amber.shade600,
+                    color: theme.colorScheme.primary,
                     minHeight: 8,
                   ),
                 ),

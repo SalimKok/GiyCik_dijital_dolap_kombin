@@ -691,13 +691,13 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: hasSelection ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.15),
+            color: hasSelection ? theme.colorScheme.primary : theme.colorScheme.primary.withValues(alpha: 0.3),
             style: BorderStyle.solid,
-            width: hasSelection ? 1.5 : 1,
+            width: hasSelection ? 2.0 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

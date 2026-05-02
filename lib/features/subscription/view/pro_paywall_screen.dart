@@ -106,8 +106,8 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.amber.shade600,
-                        Colors.orange.shade700,
+                        theme.colorScheme.primary,
+                        theme.colorScheme.primary.withValues(alpha: 0.7),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -115,7 +115,7 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.3),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
@@ -221,7 +221,7 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                 child: FilledButton(
                   onPressed: _isLoading ? null : _purchase,
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.amber.shade700,
+                    backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -313,10 +313,10 @@ class _FeatureItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.12),
+              color: theme.colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.amber.shade700, size: 22),
+            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -372,11 +372,11 @@ class _PlanCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isSelected
-                ? Colors.amber.withValues(alpha: 0.08)
+                ? theme.colorScheme.primary.withValues(alpha: 0.08)
                 : theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? Colors.amber.shade600 : theme.colorScheme.outline.withValues(alpha: 0.2),
+              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -389,10 +389,10 @@ class _PlanCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? Colors.amber.shade600 : theme.colorScheme.outline,
+                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
                     width: 2,
                   ),
-                  color: isSelected ? Colors.amber.shade600 : Colors.transparent,
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                 ),
                 child: isSelected
                     ? const Icon(Icons.check, size: 16, color: Colors.white)

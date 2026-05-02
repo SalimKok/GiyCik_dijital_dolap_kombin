@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // Ana renk paleti - sıcak, minimal
-  static const Color _primary = Color(0xFF8B7355);      // Toprak kahve
-  static const Color _primaryLight = Color(0xFFC4A77D); // Açık bej
-  static const Color _surface = Color(0xFFFAF8F5);      // Krem arka plan
-  static const Color _surfaceVariant = Color(0xFFF0EBE3);
-  static const Color _onSurface = Color(0xFF2D2926);   // Koyu metin
-  static const Color _onSurfaceVariant = Color(0xFF6B6560);
-  static const Color _outline = Color(0xFFD4CFC4);
+  // Ana renk paleti - Safir ve Platin Şıklığı (Açık Mod)
+  static const Color _primary = Color(0xFF0D224D);      // Derin Safir Mavisi (Butonlar ve Vurgular)
+  static const Color _primaryLight = Color(0xFF1A3263); // Safir açığı
+  static const Color _surface = Color(0xFFF8F9FA);      // Kırık Beyaz (Arka Plan)
+  static const Color _surfaceVariant = Color(0xFFFFFFFF); // Yüzeyler (Saf Beyaz Kartlar)
+  static const Color _onSurface = Color(0xFF0D224D);   // Koyu Safir (Ana Metin)
+  static const Color _onSurfaceVariant = Color(0xFF607D8B); // Gri/Mavi (ikincil metin)
+  static const Color _outline = Color(0xFFE0E0E0); // Platin/Gümüş (Çerçeveler)
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -39,12 +39,12 @@ class AppTheme {
         iconTheme: IconThemeData(color: _onSurface),
       ),
       cardTheme: CardThemeData(
-        color: Colors.white,
-        elevation: 4,
-        shadowColor: _onSurface.withValues(alpha: 0.08),
+        color: _surfaceVariant,
+        elevation: 8,
+        shadowColor: _primary.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: _outline.withValues(alpha: 0.3)),
+          side: BorderSide(color: _primary.withValues(alpha: 0.3)),
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
@@ -102,6 +102,18 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: _surface,
+        indicatorColor: _primary.withValues(alpha: 0.15),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return const IconThemeData(color: _primary);
+          return IconThemeData(color: _onSurfaceVariant.withValues(alpha: 0.7));
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return const TextStyle(color: _primary, fontWeight: FontWeight.bold, fontSize: 12);
+          return TextStyle(color: _onSurfaceVariant.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.w500);
+        }),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
@@ -126,14 +138,14 @@ class AppTheme {
   }
 
   // ── Koyu Tema ──────────────────────────────────────────────
-  static const Color _darkPrimary = Color(0xFFC4A77D);       // Bej altın
-  static const Color _darkPrimaryContainer = Color(0xFF5C4A35);
-  static const Color _darkSurface = Color(0xFF1A1614);        // Koyu kahve-siyah
-  static const Color _darkSurfaceVariant = Color(0xFF2A2420);
-  static const Color _darkOnSurface = Color(0xFFF0EBE3);     // Açık bej metin
-  static const Color _darkOnSurfaceVariant = Color(0xFFB0A89E);
-  static const Color _darkOutline = Color(0xFF4A433C);
-  static const Color _darkCardColor = Color(0xFF242019);
+  static const Color _darkPrimary = Color(0xFFE0E0E0);       // Platin/Gümüş (Karanlık Modda Vurgu)
+  static const Color _darkPrimaryContainer = Color(0xFFFFFFFF); // Parlak Gümüş
+  static const Color _darkSurface = Color(0xFF0A1939);        // Daha Derin Safir Mavisi arka plan
+  static const Color _darkSurfaceVariant = Color(0xFF12234B); // Yüzeyler
+  static const Color _darkOnSurface = Color(0xFFFFFFFF);     // Saf Beyaz metin
+  static const Color _darkOnSurfaceVariant = Color(0xFFB0BEC5); // Gümüş/Gri
+  static const Color _darkOutline = Color(0xFF2C4A87);       // Safir Çerçeve
+  static const Color _darkCardColor = Color(0xFF12234B);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -163,11 +175,11 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: _darkCardColor,
-        elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.3),
+        elevation: 8,
+        shadowColor: _darkPrimary.withValues(alpha: 0.15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: _darkOutline.withValues(alpha: 0.4)),
+          side: BorderSide(color: _darkPrimary.withValues(alpha: 0.3)),
         ),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
@@ -224,6 +236,18 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: _darkSurface,
+        indicatorColor: _darkPrimary.withValues(alpha: 0.15),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return const IconThemeData(color: _darkPrimary);
+          return IconThemeData(color: _darkOnSurfaceVariant.withValues(alpha: 0.7));
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return const TextStyle(color: _darkPrimary, fontWeight: FontWeight.bold, fontSize: 12);
+          return TextStyle(color: _darkOnSurfaceVariant.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.w500);
+        }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
