@@ -135,7 +135,7 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
     return ListView.separated(
       padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 80),
       itemCount: list.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      separatorBuilder: (context, index) => const SizedBox(height: 12), // Boşluk azaltıldı
       itemBuilder: (context, index) {
         final outfit = list[index];
         return _buildOutfitCard(outfit, theme);
@@ -156,11 +156,21 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
     final dirtyItemIds = laundryState.needsWashItems.map((i) => i.clothingItemId).toSet();
     final hasDirtyItem = matchedClothes.any((cloth) => dirtyItemIds.contains(cloth!.id));
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16), // Biraz daha keskin
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2), // Belirgin border
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05), // Göze batmayan ama belirgin gölge
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -168,8 +178,8 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
         children: [
           // Header section
           Container(
-            padding: const EdgeInsets.all(16),
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Küçültüldü
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -179,29 +189,30 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                     children: [
                       Text(
                         outfit.title,
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold), // Küçültüldü
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Wrap(
-                        spacing: 8,
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
                           if (hasDirtyItem)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.error,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.water_drop_rounded, size: 12, color: Colors.white),
+                                  const Icon(Icons.water_drop_rounded, size: 10, color: Colors.white),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Kirli',
-                                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                                    style: theme.textTheme.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 9),
                                   ),
                                 ],
                               ),
@@ -216,62 +227,73 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        ref.read(outfitsViewModelProvider.notifier).toggleFavorite(outfit.id);
-                      },
-                      icon: Icon(
-                        outfit.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                        color: outfit.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                    SizedBox(
+                      width: 36, // Buton alanları daraltıldı
+                      height: 36,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          ref.read(outfitsViewModelProvider.notifier).toggleFavorite(outfit.id);
+                        },
+                        icon: Icon(
+                          outfit.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          color: outfit.isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.more_vert_rounded, color: theme.colorScheme.onSurfaceVariant),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                           Navigator.of(context).push(
-                             MaterialPageRoute(
-                               builder: (context) => OutfitRecommendationScreen(editingOutfit: outfit),
-                             ),
-                           );
-                        } else if (value == 'wear') {
-                           _wearOutfit(context, outfit);
-                        } else if (value == 'delete') {
-                           _confirmDelete(context, outfit);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'wear',
-                          child: Row(
-                            children: [
-                              Icon(Icons.accessibility_new_rounded, size: 20),
-                              SizedBox(width: 8),
-                              Text('Giydim'),
-                            ],
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: PopupMenuButton<String>(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(Icons.more_vert_rounded, color: theme.colorScheme.onSurfaceVariant, size: 20),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                             Navigator.of(context).push(
+                               MaterialPageRoute(
+                                 builder: (context) => OutfitRecommendationScreen(editingOutfit: outfit),
+                               ),
+                             );
+                          } else if (value == 'wear') {
+                             _wearOutfit(context, outfit);
+                          } else if (value == 'delete') {
+                             _confirmDelete(context, outfit);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'wear',
+                            child: Row(
+                              children: [
+                                Icon(Icons.accessibility_new_rounded, size: 20),
+                                SizedBox(width: 8),
+                                Text('Giydim'),
+                              ],
+                            ),
                           ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_rounded, size: 20),
-                              SizedBox(width: 8),
-                              Text('Düzenle'),
-                            ],
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit_rounded, size: 20),
+                                SizedBox(width: 8),
+                                Text('Düzenle'),
+                              ],
+                            ),
                           ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_rounded, size: 20, color: theme.colorScheme.error),
-                              const SizedBox(width: 8),
-                              Text('Sil', style: TextStyle(color: theme.colorScheme.error)),
-                            ],
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_rounded, size: 20, color: theme.colorScheme.error),
+                                const SizedBox(width: 8),
+                                Text('Sil', style: TextStyle(color: theme.colorScheme.error)),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -281,11 +303,11 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
           
           // Items section with Images
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // Küçültüldü
             child: matchedClothes.isNotEmpty
               ? Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: 8, // Küçültüldü
+                  runSpacing: 8,
                   children: matchedClothes.map((item) {
                     final String? imageUrl = item!.imageUrl != null && item.imageUrl!.isNotEmpty
                         ? (item.imageUrl!.startsWith('http') 
@@ -293,19 +315,12 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                             : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
                         : null;
                     return Container(
-                      width: 76,
-                      height: 100,
+                      width: 54, // Küçültüldü (önceki 76)
+                      height: 72, // Küçültüldü (önceki 100)
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          )
-                        ],
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: imageUrl != null
@@ -316,8 +331,8 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                                 if (loadingProgress == null) return child;
                                 return Center(
                                   child: SizedBox(
-                                    width: 20, 
-                                    height: 20, 
+                                    width: 16, 
+                                    height: 16, 
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2, 
                                       color: theme.colorScheme.primary.withValues(alpha: 0.5)
@@ -331,7 +346,7 @@ class _OutfitsScreenState extends ConsumerState<OutfitsScreen> with SingleTicker
                     );
                   }).toList(),
                 )
-              : Text("Giysiler bulunamadı.", style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+              : Text("Giysiler bulunamadı.", style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
           ),
         ],
       ),
