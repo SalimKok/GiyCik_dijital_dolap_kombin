@@ -31,10 +31,10 @@ class WardrobeScreen extends ConsumerWidget {
                     child: GridView.builder(
                       itemCount: wardrobeState.filteredItems.length,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.78,
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 0.7,
                       ),
                       itemBuilder: (context, index) {
                         final item = wardrobeState.filteredItems[index];
@@ -198,14 +198,14 @@ class WardrobeScreen extends ConsumerWidget {
   }
 }
 
-class _WardrobeCard extends StatelessWidget {
+class _WardrobeCard extends ConsumerWidget {
   const _WardrobeCard({required this.item, this.isDirty = false});
 
   final ClothingItem item;
   final bool isDirty;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     
     // Construct full URL using base URL (stripping '/api' since item.imageUrl starts with '/api/')
@@ -218,33 +218,25 @@ class _WardrobeCard extends StatelessWidget {
       shape: theme.cardTheme.shape as RoundedRectangleBorder,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => ClothingCaptureScreen(existingItem: item),
-            ),
-          );
-        },
+        onTap: () => _showItemDetails(context, ref, theme, fullImageUrl),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8), // Küçültüldü
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. AspectRatio yerine Expanded kullanıyoruz.
-              // Böylece metinlerden arta kalan tüm alanı taşmadan doldurur.
               Expanded(
                 child: Container(
-                  width: double.infinity, // Kutunun sağa-sola tam yaslanması için
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       fullImageUrl != null
                           ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                               child: Image.network(
                                 fullImageUrl,
                                 fit: BoxFit.cover,
@@ -253,52 +245,36 @@ class _WardrobeCard extends StatelessWidget {
                             )
                           : _buildFallbackIcon(theme),
                       
-                      // Dirty Badge
                       if (isDirty)
                         Positioned(
-                          top: 8,
-                          right: 8,
+                          top: 4,
+                          right: 4,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.error,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.water_drop_rounded, size: 16, color: Colors.white),
+                            child: const Icon(Icons.water_drop_rounded, size: 12, color: Colors.white),
                           ),
                         ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 item.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(fontSize: 14),
+                style: theme.textTheme.titleSmall?.copyWith(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
               Text(
                 '${item.category} • ${item.color}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
-              ),
-              const SizedBox(height: 8), // 2. Spacer yerine sabit bir boşluk verdik.
-              Row(
-                children: [
-                  Icon(
-                    Icons.repeat_rounded,
-                    size: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${item.usageCount} kez giyildi',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 11),
-                  ),
-                ],
+                style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -306,6 +282,160 @@ class _WardrobeCard extends StatelessWidget {
       ),
     );
   }
+
+  void _showItemDetails(BuildContext context, WidgetRef ref, ThemeData theme, String? fullImageUrl) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20, 
+            right: 20, 
+            top: 24, 
+            bottom: MediaQuery.of(context).padding.bottom + 24
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 100, height: 100,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: fullImageUrl != null
+                        ? Image.network(fullImageUrl, fit: BoxFit.cover)
+                        : _buildFallbackIcon(theme),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text('${item.category} • ${item.color}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.repeat_rounded, size: 16, color: theme.colorScheme.onSecondaryContainer),
+                              const SizedBox(width: 6),
+                              Text('${item.usageCount} kez giyildi', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Kıyafeti Sil'),
+                            content: const Text('Bu kıyafeti silmek istediğinizden emin misiniz?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('İptal'),
+                              ),
+                              FilledButton(
+                                style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Sil'),
+                              ),
+                            ],
+                          ),
+                        );
+                        
+                        if (confirm == true) {
+                          try {
+                            await ref.read(wardrobeViewModelProvider.notifier).deleteItem(item.id);
+                            if (context.mounted) {
+                              Navigator.pop(context); // Close bottom sheet
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Kıyafet başarıyla silindi.')),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Hata: $e')),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Sil'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: theme.colorScheme.error,
+                        side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => ClothingCaptureScreen(existingItem: item),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.edit_rounded),
+                      label: const Text('Düzenle'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   Widget _buildFallbackIcon(ThemeData theme) {
     return Icon(
