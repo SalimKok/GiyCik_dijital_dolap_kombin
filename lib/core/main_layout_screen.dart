@@ -10,6 +10,8 @@ import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.da
 import 'package:gircik/features/subscription/view/pro_paywall_screen.dart';
 import 'package:gircik/core/providers/navigation_provider.dart';
 import 'package:gircik/features/pro_features/view/pro_features_hub_screen.dart';
+import 'package:gircik/features/home/viewmodel/home_viewmodel.dart';
+
 class MainLayoutScreen extends ConsumerStatefulWidget {
   const MainLayoutScreen({super.key});
 
@@ -50,9 +52,20 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
       _currentIndex = currentIndex;
     }
 
+    final userName = ref.watch(homeViewModelProvider).userName;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[currentIndex]),
+        title: isHome 
+            ? Text(
+                'GiyÇık',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.primary,
+                  letterSpacing: -0.5,
+                ),
+              )
+            : Text(_titles[currentIndex]),
         leading: isHome
             ? Center(
                 child: GestureDetector(

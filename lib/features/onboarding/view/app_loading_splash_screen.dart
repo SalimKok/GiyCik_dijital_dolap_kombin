@@ -103,9 +103,8 @@ class _AppLoadingSplashScreenState extends ConsumerState<AppLoadingSplashScreen>
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
-                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    color: theme.colorScheme.surface,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -115,16 +114,19 @@ class _AppLoadingSplashScreenState extends ConsumerState<AppLoadingSplashScreen>
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.checkroom_rounded,
-                    size: 80,
-                    color: theme.colorScheme.primary,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 220,
+                      height: 220,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
             ),
             
-            const SizedBox(height: 48),
+            const SizedBox(height: 40),
             
             // Text Animation
             FadeTransition(

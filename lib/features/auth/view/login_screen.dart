@@ -251,27 +251,41 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
 
   Widget _buildHeader(ThemeData theme) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 56,
-          height: 56,
+          width: 101,
+          height: 100,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                blurRadius: 20,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+          child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+            ),
           ),
-          child: Icon(
-            Icons.checkroom_rounded,
-            size: 30,
-            color: theme.colorScheme.primary,
-          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'GİYÇIK',
+          style: theme.textTheme.headlineMedium,
         ),
         const SizedBox(height: 20),
         Text(
           'Tekrar hoş geldin',
           style: theme.textTheme.headlineMedium,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         Text(
           'Hesabına giriş yap ve gardıropuna kaldığın yerden devam et.',
           style: theme.textTheme.bodyMedium,

@@ -40,9 +40,10 @@ async def generate_outfit_recommendation(
     from datetime import datetime, timezone
 
     # 1. Check Subscription and Trial Limit
+    from app.models.subscription import SubscriptionPlanEnum
     sub_res = await db.execute(select(Subscription).where(Subscription.user_id == current_user.id))
     subscription = sub_res.scalar_one_or_none()
-    is_pro = subscription.is_pro if subscription else False
+    is_pro = subscription.plan != SubscriptionPlanEnum.free if subscription else False
     
     now = datetime.now(timezone.utc)
     # Ensure timezone awareness for comparison

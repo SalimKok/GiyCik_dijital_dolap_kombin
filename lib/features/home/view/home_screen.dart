@@ -59,16 +59,17 @@ class HomeScreen extends ConsumerWidget {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () => ref.read(homeViewModelProvider.notifier).loadHomeData(),
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildSectionTitle(context, 'Yaklaşan Önemli Bilgiler'),
-                        const SizedBox(height: 12),
-                        _buildUpcomingInfo(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildSectionTitle(context, 'Yaklaşan Önemli Bilgiler'),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        flex: 4,
+                        child: _buildUpcomingInfo(
                           context,
                           ref,
                           laundryCount,
@@ -76,24 +77,28 @@ class HomeScreen extends ConsumerWidget {
                           nextEventTime,
                           nextEvent,
                         ),
-                        const SizedBox(height: 28),
-                        _buildSectionTitle(context, 'Favori Kombinler'),
-                        const SizedBox(height: 12),
-                        _buildFavoriteOutfits(context, ref, favoriteOutfits),
-                        const SizedBox(height: 28),
-                        _buildSectionTitle(context, 'Bugün'),
-                        const SizedBox(height: 12),
-                        _buildTodayCard(context, ref, homeState),
-                      ]),
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSectionTitle(context, 'Favori Kombinler'),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        flex: 5,
+                        child: _buildFavoriteOutfits(context, ref, favoriteOutfits),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSectionTitle(context, 'Bugün'),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        flex: 9,
+                        child: _buildTodayCard(context, ref, homeState),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
     );
   }
-
-
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     final theme = Theme.of(context);
@@ -114,32 +119,37 @@ class HomeScreen extends ConsumerWidget {
     String nextEventTime,
     CalendarEvent? nextEvent,
   ) {
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _InfoCard(
-          icon: Icons.local_laundry_service_rounded,
-          title: 'Yıkanması Gerekenler',
-          subtitle: laundryCount > 0 
-            ? '$laundryCount kıyafetin yıkanma vakti geldi.' 
-            : 'Yıkanacak kıyafet yok.',
-          color: Colors.blue,
-          onTap: () {
-            // Hijyen sekmesi index 5
-            ref.read(mainNavIndexProvider.notifier).navigate(5);
-          },
+        Expanded(
+          child: _InfoCard(
+            icon: Icons.local_laundry_service_rounded,
+            title: 'Yıkanması Gerekenler',
+            subtitle: laundryCount > 0 
+              ? '$laundryCount kıyafet' 
+              : 'Yok',
+            color: Colors.blue,
+            onTap: () {
+              // Hijyen sekmesi index 5
+              ref.read(mainNavIndexProvider.notifier).navigate(5);
+            },
+          ),
         ),
-        const SizedBox(height: 12),
-        _InfoCard(
-          icon: Icons.event_rounded,
-          title: 'Yaklaşan Etkinlik',
-          subtitle: '$nextEventTime $nextEventTitle',
-          color: Colors.orange,
-          onTap: nextEvent != null ? () {
-            // Takvim sekmesi index 3, ilgili günü seç
-            ref.read(styleCalendarViewModelProvider.notifier)
-                .selectDay(nextEvent.date, nextEvent.date);
-            ref.read(mainNavIndexProvider.notifier).navigate(3);
-          } : () {},
+        const SizedBox(width: 12),
+        Expanded(
+          child: _InfoCard(
+            icon: Icons.event_rounded,
+            title: 'Yaklaşan Etkinlik',
+            subtitle: nextEvent != null ? '$nextEventTime $nextEventTitle' : 'Yok',
+            color: Colors.orange,
+            onTap: nextEvent != null ? () {
+              // Takvim sekmesi index 3, ilgili günü seç
+              ref.read(styleCalendarViewModelProvider.notifier)
+                  .selectDay(nextEvent.date, nextEvent.date);
+              ref.read(mainNavIndexProvider.notifier).navigate(3);
+            } : () {},
+          ),
         ),
       ],
     );
@@ -161,9 +171,7 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    return SizedBox(
-      height: 195,
-      child: ListView.separated(
+    return ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: favorites.length,
         separatorBuilder: (context, index) => const SizedBox(width: 14),
@@ -181,9 +189,10 @@ class HomeScreen extends ConsumerWidget {
             return null;
           }).where((url) => url != null).cast<String>().toList();
 
-          return Container(
-            width: 158,
-            decoration: BoxDecoration(
+          return AspectRatio(
+            aspectRatio: 1.0,
+            child: Container(
+              decoration: BoxDecoration(
               color: theme.cardTheme.color,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
@@ -292,10 +301,10 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            ),
           );
         },
-      ),
-    );
+      );
   }
 
   Widget _buildOutfitPlaceholder(ThemeData theme) {
@@ -369,7 +378,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12), // Daha da küçültüldü
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -379,7 +388,7 @@ class HomeScreen extends ConsumerWidget {
             theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           ],
         ),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(20), // Daha da küçültüldü
         border: Border.all(
           color: weatherColor.withValues(alpha: 0.25),
           width: 2,
@@ -406,10 +415,10 @@ class HomeScreen extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(6), // Daha da küçültüldü
                     decoration: BoxDecoration(
                       color: weatherColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
                           color: weatherColor.withValues(alpha: 0.1),
@@ -418,22 +427,22 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    child: Icon(weatherIcon, color: weatherColor, size: 28),
+                    child: Icon(weatherIcon, color: weatherColor, size: 20), // Daha da küçültüldü
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         weather.city,
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith( // Daha da küçültüldü
                           fontWeight: FontWeight.bold,
                           letterSpacing: -0.5,
                         ),
                       ),
                       Text(
                         weather.condition,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.labelSmall?.copyWith( // Daha da küçültüldü
                           color: theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
@@ -444,41 +453,44 @@ class HomeScreen extends ConsumerWidget {
               ),
               Text(
                 '${weather.temperature.toInt()}°',
-                style: theme.textTheme.displaySmall?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith( // Daha da küçültüldü
                   fontWeight: FontWeight.w300,
                   color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8), // Boşluklar azaltıldı
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Daha da küçültüldü
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
             ),
             child: Row(
               children: [
-                Icon(Icons.tips_and_updates_rounded, size: 20, color: theme.colorScheme.primary),
-                const SizedBox(width: 12),
+                Icon(Icons.tips_and_updates_rounded, size: 14, color: theme.colorScheme.primary), // Daha da küçültüldü
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     weather.advice,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith( // Daha da küçültüldü
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
-                      height: 1.3,
+                      height: 1.1,
+                      fontSize: 10,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           const Divider(height: 1, thickness: 0.5),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           
           if (recommendation == null)
             state.isRecommendationLoading
@@ -550,50 +562,53 @@ class HomeScreen extends ConsumerWidget {
       return wardrobeItems.where((w) => w.id == id).firstOrNull;
     }).where((item) => item != null).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Önerilen Kombin',
-          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 80,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: matchedClothes.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (context, index) {
-              final item = matchedClothes[index];
-              final String? imageUrl = item?.imageUrl != null && item!.imageUrl!.isNotEmpty
-                  ? (item.imageUrl!.startsWith('http') 
-                      ? item.imageUrl! 
-                      : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
-                  : null;
-
-              return Container(
-                width: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: imageUrl != null 
-                  ? Image.network(imageUrl, fit: BoxFit.cover)
-                  : _buildOutfitPlaceholder(theme),
-              );
-            },
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Önerilen Kombin',
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          recommendation['description'] ?? 'Harika bir kombin!',
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: matchedClothes.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                final item = matchedClothes[index];
+                final String? imageUrl = item?.imageUrl != null && item!.imageUrl!.isNotEmpty
+                    ? (item.imageUrl!.startsWith('http') 
+                        ? item.imageUrl! 
+                        : '${ApiConstants.baseUrl.replaceAll('/api', '')}${item.imageUrl}')
+                    : null;
+
+                return AspectRatio(
+                  aspectRatio: 0.75, // Biraz dikey dikdörtgen daha şık durur
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: imageUrl != null 
+                      ? Image.network(imageUrl, fit: BoxFit.cover)
+                      : _buildOutfitPlaceholder(theme),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            recommendation['description'] ?? 'Harika bir kombin!',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -640,47 +655,51 @@ class _InfoCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      child: Icon(icon, color: color, size: 20),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                   ],
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
+                const Spacer(flex: 3),
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Spacer(flex: 1),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      )
     );
   }
 }
