@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:gircik/data/models/clothing_item.dart';
 import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
 import 'package:gircik/features/wardrobe/repository/clothing_repository.dart';
+import 'package:gircik/features/laundry/viewmodel/laundry_viewmodel.dart';
 import 'package:gircik/core/constants/api_constants.dart';
 
 class ClothingCaptureScreen extends ConsumerStatefulWidget {
@@ -148,6 +149,8 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
           newItem, 
           imagePath: _processedImageUrl == null ? _imageFile?.path : null, 
         );
+        // Hijyen listesini yenile (circular import yok, bu ekran her ikisine de erişebilir)
+        ref.read(laundryViewModelProvider.notifier).loadItems();
       }
 
       if (mounted) {

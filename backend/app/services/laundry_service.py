@@ -54,6 +54,11 @@ async def ensure_laundry_for_user(db: AsyncSession, user_id: int):
     created = 0
     skipped_categories = ["Şal/Eşarp", "Ayakkabı", "Aksesuar"]
     
+    # Kullanıcının mevcut max_wear tercihini oku (varsa)
+    stmt_pref = select(LaundryItem.max_wear).where(LaundryItem.user_id == user_id).limit(1)
+    result_pref = await db.execute(stmt_pref)
+    user_max_wear = result_pref.scalar_one_or_none() or 3
+    
     for cloth in all_clothes:
         if cloth.id not in existing_ids and cloth.category not in skipped_categories:
             db_item = LaundryItem(
@@ -63,7 +68,7 @@ async def ensure_laundry_for_user(db: AsyncSession, user_id: int):
                 name=cloth.name,
                 category=cloth.category,
                 wear_count=0,
-                max_wear=3,
+                max_wear=user_max_wear,
                 icon_name='checkroom',
                 status=LaundryStatusEnum.clean
             )

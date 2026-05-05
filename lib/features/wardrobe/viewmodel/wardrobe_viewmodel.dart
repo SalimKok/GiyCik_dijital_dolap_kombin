@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/data/models/clothing_item.dart';
 import 'package:gircik/features/wardrobe/repository/clothing_repository.dart';
 import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.dart';
-import 'package:gircik/features/laundry/repository/laundry_repository.dart';
 
 // ViewModel State
 class WardrobeState {
@@ -115,9 +114,6 @@ class WardrobeViewModel extends Notifier<WardrobeState> {
       
       // Increment subscription counter
       ref.read(subscriptionProvider.notifier).incrementClothingCount();
-
-      // Yeni kıyafet eklenince hijyen listesini tazele (circular import yok)
-      ref.invalidate(laundryRepositoryProvider);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
