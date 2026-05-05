@@ -202,6 +202,8 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
 
     try {
       await ref.read(wardrobeViewModelProvider.notifier).deleteItem(widget.existingItem!.id);
+      // Hijyen listesini de yenile — backend CASCADE ile siliyor, Flutter state'ini güncelle
+      ref.read(laundryViewModelProvider.notifier).loadItems();
       if (mounted) {
         Navigator.of(context).pop();
       }

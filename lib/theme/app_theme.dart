@@ -8,10 +8,10 @@ class AppTheme {
   static const Color _primary = Color(0xFF0D224D);      // Derin Safir Mavisi (Butonlar ve Vurgular)
   static const Color _primaryLight = Color(0xFF1A3263); // Safir açığı
   static const Color _surface = Color(0xFFF8F9FA);      // Kırık Beyaz (Arka Plan)
-  static const Color _surfaceVariant = Color(0xFFFFFFFF); // Yüzeyler (Saf Beyaz Kartlar)
+  static const Color _surfaceVariant = Color(0xFFFFFFff); // Yüzeyler (Saf Beyaz Kartlar)
   static const Color _onSurface = Color(0xFF0D224D);   // Koyu Safir (Ana Metin)
-  static const Color _onSurfaceVariant = Color(0xFF607D8B); // Gri/Mavi (ikincil metin)
-  static const Color _outline = Color(0xFFE0E0E0); // Platin/Gümüş (Çerçeveler)
+  static const Color _onSurfaceVariant = Color(0xFF4D64A0); // Gri/Mavi (ikincil metin)
+  static const Color _outline = Color(0xFF9EB0E6); // Platin/Gümüş (Çerçeveler)
 
   static ThemeData get lightTheme {
     return ThemeData(

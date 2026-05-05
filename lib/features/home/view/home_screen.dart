@@ -9,11 +9,8 @@ import 'package:gircik/data/models/outfit_item.dart';
 import 'package:gircik/data/models/calendar_event.dart';
 import 'package:gircik/core/providers/navigation_provider.dart';
 import 'package:gircik/core/constants/api_constants.dart';
-import 'package:gircik/core/services/weather_service.dart';
-
 import '../../subscription/view/pro_paywall_screen.dart';
 import '../../subscription/viewmodel/subscription_viewmodel.dart';
-import '../../travel/view/travel_assistant_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
