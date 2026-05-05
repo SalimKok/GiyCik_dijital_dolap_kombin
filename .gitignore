@@ -52,3 +52,10 @@ backend/__pycache__/
 .env
 firebase_credentials.json
 backend/firebase_credentials.json
+# Firebase Secret Files
+android/app/google-services.json
+lib/firebase_options.dart
+
+# Keystore and Passwords
+android/app/upload-keystore.jks
+key.properties

@@ -10,7 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // To use Firebase, the user must run `flutterfire configure` and then uncomment below:
+  if (Firebase.apps.isEmpty) {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
 
   runApp(
     const ProviderScope(

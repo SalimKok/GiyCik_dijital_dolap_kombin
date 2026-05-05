@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "596539728562",
-    "project_id": "giycik-a350a",
-    "storage_bucket": "giycik-a350a.firebasestorage.app"
+    "project_number": "754807946146",
+    "project_id": "giycik-c4989",
+    "storage_bucket": "giycik-c4989.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:596539728562:android:8524bc9647be3ed3885fab",
+        "mobilesdk_app_id": "1:754807946146:android:387335e98f3121e15d50fb",
         "android_client_info": {
-          "package_name": "com.example.gircik"
+          "package_name": "com.salimkok.giycik"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCTi58OSHJ6MSrelJ4BIjwbrCMmgtjKfNU"
+          "current_key": "AIzaSyAIeA8-L4dlaI2UEgkpQv4TN-B284a1pvs"
         }
       ],
       "services": {
