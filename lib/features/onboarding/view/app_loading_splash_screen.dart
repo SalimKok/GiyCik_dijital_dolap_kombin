@@ -103,22 +103,23 @@ class _AppLoadingSplashScreenState extends ConsumerState<AppLoadingSplashScreen>
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
+                  width: 130,
+                  height: 130,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
                         color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                        blurRadius: 30,
-                        spreadRadius: 5,
+                        blurRadius: 20,
+                        spreadRadius: 10,
                       ),
                     ],
                   ),
-                  child: ClipOval(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
                     child: Image.asset(
                       'assets/images/logo.png',
-                      width: 220,
-                      height: 220,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -134,14 +135,14 @@ class _AppLoadingSplashScreenState extends ConsumerState<AppLoadingSplashScreen>
               child: Column(
                 children: [
                   Text(
-                    'Merhaba $userName,',
+                    'Merhaba $userName',
                     style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w300,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'bugün ne giyeceksin?',
+                    'Bugün ne giyeceksin?',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -159,7 +160,7 @@ class _AppLoadingSplashScreenState extends ConsumerState<AppLoadingSplashScreen>
               duration: const Duration(milliseconds: 300),
               child: _JumpingDots(
                 color: theme.colorScheme.primary,
-                size: 12,
+                size: 16,
               ),
             ),
           ],
