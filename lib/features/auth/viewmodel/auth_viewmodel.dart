@@ -38,7 +38,8 @@ class AuthState {
 }
 
 class AuthViewModel extends Notifier<AuthState> {
-  static const String _keyLoggedIn = 'isLoggedIn';
+  static const String _keyLoggedIn    = 'isLoggedIn';
+  static const String _keyRememberMe  = 'login_remember_me';
   static const String _keySeenWelcome = 'seen_welcome';
 
   @override
@@ -49,17 +50,19 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    final bool loggedIn = prefs.getBool(_keyLoggedIn) ?? false;
+    final bool rememberMe  = prefs.getBool(_keyRememberMe)  ?? false;
+    final bool loggedIn    = prefs.getBool(_keyLoggedIn)    ?? false;
     final bool seenWelcome = prefs.getBool(_keySeenWelcome) ?? false;
 
+    // Otomatik giriş yalnızca "Beni Hatırla" işaretliyse yapılır
+    final bool autoLogin = rememberMe && loggedIn;
+
     state = AuthState(
-      status: loggedIn ? AuthStatus.authenticated : AuthStatus.unauthenticated,
+      status: autoLogin ? AuthStatus.authenticated : AuthStatus.unauthenticated,
       hasSeenWelcome: seenWelcome,
     );
 
-    if (loggedIn) {
-      // Initialize notifications if logged in
-      // Try-catch in case Firebase is not configured yet
+    if (autoLogin) {
       try {
         await ref.read(notificationServiceProvider).initialize();
       } catch (e) {
@@ -84,15 +87,24 @@ class AuthViewModel extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await ref.read(authRepositoryProvider).login(email, password);
-      await setLoggedIn(true);
-      
+
+      final prefs = await SharedPreferences.getInstance();
+      // "Beni Hatırla" seçiliyse kalıcı oturum kaydet; değilse sadece flag'i false bırak
+      await prefs.setBool(_keyRememberMe, rememberMe);
+      if (rememberMe) {
+        await prefs.setBool(_keyLoggedIn, true);
+      } else {
+        // Bir önceki oturumdan kalan kaydı temizle
+        await prefs.remove(_keyLoggedIn);
+      }
+
       try {
         await ref.read(notificationServiceProvider).initialize();
       } catch (e) {
         print("Firebase notification initialization skipped: $e");
       }
 
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString().replaceFirst('Exception: ', ''));
@@ -104,15 +116,18 @@ class AuthViewModel extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await ref.read(authRepositoryProvider).register(name, email, password);
-      await setLoggedIn(true);
-      
+      // Kayıt olunca "Beni Hatırla" aktif say ve kalıcı kaydet
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyRememberMe, true);
+      await prefs.setBool(_keyLoggedIn, true);
+
       try {
         await ref.read(notificationServiceProvider).initialize();
       } catch (e) {
         print("Firebase notification initialization skipped: $e");
       }
 
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString().replaceFirst('Exception: ', ''));
@@ -122,8 +137,11 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> logout() async {
     await ref.read(authRepositoryProvider).logout();
-    await setLoggedIn(false);
-    state = state.copyWith(hasSeenSplash: false);
+    final prefs = await SharedPreferences.getInstance();
+    // Çıkış yapınca hem oturumu hem de "Beni Hatırla" flag'ini temizle
+    await prefs.remove(_keyLoggedIn);
+    await prefs.remove(_keyRememberMe);
+    state = state.copyWith(status: AuthStatus.unauthenticated, hasSeenSplash: false);
   }
 
   void setSeenSplash(bool value) {
@@ -132,10 +150,14 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> deleteAccount() async {
     await ref.read(authRepositoryProvider).deleteAccount();
-    await setLoggedIn(false);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyLoggedIn);
+    await prefs.remove(_keyRememberMe);
+    state = state.copyWith(status: AuthStatus.unauthenticated);
   }
 }
 
 final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(() {
   return AuthViewModel();
 });
+

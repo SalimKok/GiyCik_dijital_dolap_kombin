@@ -178,7 +178,7 @@ class HomeViewModel extends Notifier<HomeState> {
       final recommendation = await _outfitRepo.generateAIOutfit(
         season: season,
         weather: state.weather!.condition,
-        event: 'Günlük/Casual',
+        event: 'Günlük',
         style: 'Rahat',
       );
       

@@ -8,14 +8,17 @@ class WardrobeState {
   final bool isLoading;
   final String selectedCategory;
   final String selectedColor;
+  final String selectedSeason;
   final List<ClothingItem> items;
   final List<String> categories;
+  final List<String> seasons;
   final String? error;
 
   WardrobeState({
     this.isLoading = false,
     this.selectedCategory = 'Hepsi',
     this.selectedColor = 'Hepsi',
+    this.selectedSeason = 'Hepsi',
     this.items = const [],
     this.categories = const [
       'Hepsi',
@@ -26,6 +29,13 @@ class WardrobeState {
       'Aksesuar',
       'Şal/Eşarp',
     ],
+    this.seasons = const [
+      'Hepsi',
+      'Yazlık',
+      'Kışlık',
+      'Sonbahar',
+      'İlkbahar',
+    ],
     this.error,
   });
 
@@ -33,16 +43,20 @@ class WardrobeState {
     bool? isLoading,
     String? selectedCategory,
     String? selectedColor,
+    String? selectedSeason,
     List<ClothingItem>? items,
     List<String>? categories,
+    List<String>? seasons,
     String? error,
   }) {
     return WardrobeState(
       isLoading: isLoading ?? this.isLoading,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       selectedColor: selectedColor ?? this.selectedColor,
+      selectedSeason: selectedSeason ?? this.selectedSeason,
       items: items ?? this.items,
       categories: categories ?? this.categories,
+      seasons: seasons ?? this.seasons,
       error: error,
     );
   }
@@ -60,6 +74,9 @@ class WardrobeState {
     }
     if (selectedColor != 'Hepsi') {
       result = result.where((i) => i.color == selectedColor).toList();
+    }
+    if (selectedSeason != 'Hepsi') {
+      result = result.where((i) => i.season == selectedSeason).toList();
     }
     return result;
   }
@@ -93,6 +110,10 @@ class WardrobeViewModel extends Notifier<WardrobeState> {
 
   void selectColor(String color) {
     state = state.copyWith(selectedColor: color);
+  }
+
+  void selectSeason(String season) {
+    state = state.copyWith(selectedSeason: season);
   }
 
   Future<void> addItem(ClothingItem item, {String? imagePath}) async {

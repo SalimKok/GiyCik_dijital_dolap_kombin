@@ -96,6 +96,7 @@ class WardrobeScreen extends ConsumerWidget {
               // İleride gelişmiş filtre/sort için kullanılabilir
               showModalBottomSheet<void>(
                 context: context,
+                isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
@@ -104,10 +105,15 @@ class WardrobeScreen extends ConsumerWidget {
                     builder: (context, ref, child) {
                       final bottomSheetState = ref.watch(wardrobeViewModelProvider);
                       final sheetTheme = Theme.of(context);
-                      return Padding(
+                      return DraggableScrollableSheet(
+                      expand: false,
+                      initialChildSize: 0.6,
+                      minChildSize: 0.4,
+                      maxChildSize: 0.92,
+                      builder: (_, scrollController) => SingleChildScrollView(
+                        controller: scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -125,6 +131,42 @@ class WardrobeScreen extends ConsumerWidget {
                                   selected: isSelected,
                                   onSelected: (_) {
                                     ref.read(wardrobeViewModelProvider.notifier).selectCategory(c);
+                                  },
+                                  selectedColor: sheetTheme.colorScheme.primary.withValues(alpha: 0.15),
+                                  labelStyle: sheetTheme.textTheme.bodyMedium?.copyWith(
+                                    color: isSelected
+                                        ? sheetTheme.colorScheme.primary
+                                        : sheetTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                  ),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? sheetTheme.colorScheme.primary
+                                        : sheetTheme.colorScheme.outline.withValues(alpha: 0.7),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  backgroundColor: Colors.white,
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Mevsimler',
+                              style: sheetTheme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: bottomSheetState.seasons.map((s) {
+                                final isSelected = s == bottomSheetState.selectedSeason;
+                                return ChoiceChip(
+                                  label: Text(s),
+                                  selected: isSelected,
+                                  onSelected: (_) {
+                                    ref.read(wardrobeViewModelProvider.notifier).selectSeason(s);
                                   },
                                   selectedColor: sheetTheme.colorScheme.primary.withValues(alpha: 0.15),
                                   labelStyle: sheetTheme.textTheme.bodyMedium?.copyWith(
@@ -183,6 +225,7 @@ class WardrobeScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ),
                       );
                     },
                   );

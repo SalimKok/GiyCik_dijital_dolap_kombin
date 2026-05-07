@@ -106,143 +106,185 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
     final authState = ref.watch(authViewModelProvider);
     final isLoading = authState.isLoading;
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top -
-                MediaQuery.of(context).padding.bottom,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 48),
-              _buildHeader(theme),
-              const SizedBox(height: 40),
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'E-posta',
-                        hintText: 'ornek@email.com',
-                        prefixIcon: Icon(Icons.email_outlined),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.surface,
+            theme.colorScheme.primary.withValues(alpha: 0.05),
+            theme.colorScheme.primary.withValues(alpha: 0.12),
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
+                _buildHeader(theme),
+                const SizedBox(height: 40),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: theme.cardTheme.color ?? Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'E-posta adresi girin';
-                        }
-                        if (!v.contains('@') || !v.contains('.')) {
-                          return 'Geçerli bir e-posta adresi girin';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submit(),
-                      decoration: InputDecoration(
-                        labelText: 'Şifre',
-                        hintText: '••••••••',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
-                          },
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.length < 6) {
-                          return 'Şifre en az 6 karakter olmalı';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: Checkbox(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() => _rememberMe = value ?? false);
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            activeColor: theme.colorScheme.primary,
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          decoration: const InputDecoration(
+                            labelText: 'E-posta',
+                            hintText: 'ornek@email.com',
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() => _rememberMe = !_rememberMe);
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'E-posta adresi girin';
+                            }
+                            if (!v.contains('@') || !v.contains('.')) {
+                              return 'Geçerli bir e-posta adresi girin';
+                            }
+                            return null;
                           },
-                          child: Text(
-                            'Beni hatırla',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _submit(),
+                          decoration: InputDecoration(
+                            labelText: 'Şifre',
+                            hintText: '••••••••',
+                            prefixIcon: const Icon(Icons.lock_outline_rounded),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() => _obscurePassword = !_obscurePassword);
+                              },
                             ),
                           ),
+                          validator: (v) {
+                            if (v == null || v.length < 6) {
+                              return 'Şifre en az 6 karakter olmalı';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() => _rememberMe = value ?? false);
+                                },
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                activeColor: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => _rememberMe = !_rememberMe);
+                              },
+                              child: Text(
+                                'Beni hatırla',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        FilledButton(
+                          onPressed: isLoading ? null : _submit,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Giriş Yap',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
-                    FilledButton(
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Giriş Yap'),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24, top: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Hesabın yok mu? ',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    TextButton(
-                      onPressed: _goToRegister,
-                      style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24, top: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Hesabın yok mu? ',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                      child: const Text('Kayıt ol'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: _goToRegister,
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.colorScheme.primary,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
+                        child: const Text(
+                          'Kayıt ol',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -254,11 +296,11 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 120,
-          height: 120,
+          width: 130,
+          height: 130,
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
                 color: theme.colorScheme.primary.withValues(alpha: 0.2),
@@ -268,9 +310,9 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(22),
             child: Image.asset(
-              'assets/images/logo.png',
+              'assets/images/logo2.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -282,7 +324,7 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Hesabına giriş yap ve gardıropuna kaldığın yerden devam et.',
+          'Hesabına giriş yap ve gardırobuna kaldığın yerden devam et.',
           style: theme.textTheme.bodyMedium,
         ),
       ],

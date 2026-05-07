@@ -201,7 +201,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           _buildDropdown(
             label: 'Etkinlik',
             value: _selectedEvent,
-            items: ['Günlük/Casual', 'İş/Ofis', 'Akşam Yemeği', 'Özel Davet', 'Spor', 'Tatilde'],
+            items: ['Günlük', 'İş / Ofis', 'Akşam Yemeği', 'Özel Davet', 'Spor', 'Tatil', 'Ev'],
             onChanged: (val) => setState(() => _selectedEvent = val),
             icon: Icons.event_rounded,
           ),

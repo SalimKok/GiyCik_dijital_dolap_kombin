@@ -7,9 +7,11 @@ import 'package:gircik/data/models/subscription.dart';
 import 'package:gircik/features/settings/viewmodel/settings_viewmodel.dart';
 import 'package:gircik/features/auth/repository/auth_repository.dart';
 import 'package:gircik/core/providers/navigation_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/app_start_screen.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import 'package:gircik/features/onboarding/view/welcome_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -188,8 +190,38 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.description_rounded,
                 iconColor: Colors.grey,
                 title: 'Gizlilik Politikası',
+                subtitle: 'Kişisel verilerin nasıl kullanıldığını öğren',
                 trailing: Icon(Icons.open_in_new_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
-                onTap: () {},
+                onTap: () async {
+                  final uri = Uri.parse('https://sites.google.com/view/giycikgizlilikpolitikasi/ana-sayfa');
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Tarayıcı açılamadı.')),
+                      );
+                    }
+                  }
+                },
+              ),
+              const _SettingsDivider(),
+              _SettingsTile(
+                icon: Icons.slideshow_rounded,
+                iconColor: Colors.teal,
+                title: 'Uygulama Tanıtımını İzle',
+                trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WelcomeScreen(
+                        onWelcomeDone: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

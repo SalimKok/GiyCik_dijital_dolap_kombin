@@ -37,7 +37,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       subtitle:
           'Kıyafetlerini fotoğrafla, hepsini tek yerden yönet. '
           'Kategorize et, favorile, aradığını anında bul.',
-      gradientColors: [Color(0xFF8B7355), Color(0xFFC4A77D)],
+      gradientColors: [Color(0xFF0D224D), Color(0xFF1A3263)], // Derin Safir
       bgIcon: Icons.dry_cleaning_rounded,
     ),
     _PageData(
@@ -46,7 +46,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       subtitle:
           'Hava durumu, özel günler ve stil tercihlerine göre '
           'yapay zeka destekli kombin önerileri al.',
-      gradientColors: [Color(0xFF6B5B95), Color(0xFFA084CA)],
+      gradientColors: [Color(0xFF1A3263), Color(0xFF2B4A8E)], // Orta Safir
       bgIcon: Icons.psychology_rounded,
     ),
     _PageData(
@@ -55,7 +55,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       subtitle:
           'Stil takvimi ile etkinliklere hazırlan. '
           'Ne zaman ne giyeceğini önceden planla.',
-      gradientColors: [Color(0xFF2E86AB), Color(0xFF56C5D0)],
+      gradientColors: [Color(0xFF2B4A8E), Color(0xFF4D64A0)], // Açık Safir
       bgIcon: Icons.event_note_rounded,
     ),
     _PageData(
@@ -64,8 +64,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       subtitle:
           'Kıyafetlerinin kullanım sayısını izle. '
           'Yıkama vakti gelince otomatik hatırlatma al.',
-      gradientColors: [Color(0xFF45B69C), Color(0xFF7DD87D)],
+      gradientColors: [Color(0xFF4D64A0), Color(0xFF7289C4)], // Pastel Safir
       bgIcon: Icons.water_drop_rounded,
+    ),
+    _PageData(
+      icon: Icons.explore_rounded,
+      title: 'Daha Fazla\nKeşfet',
+      subtitle:
+          'Yapay zeka destekli seyahat asistanı ile valizini saniyeler içinde hazırla. '
+          'Gelişmiş analitiklerle gardırop kullanım alışkanlıklarını incele.',
+      gradientColors: [Color(0xFF7289C4), Color(0xFF9EB0E6)], // Platin/Gümüş
+      bgIcon: Icons.analytics_outlined,
     ),
   ];
 
@@ -121,7 +130,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Text(
                   'Atla',
                   style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
