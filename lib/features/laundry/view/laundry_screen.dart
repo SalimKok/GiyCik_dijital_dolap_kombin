@@ -31,6 +31,18 @@ class _LaundryScreenState extends ConsumerState<LaundryScreen> with SingleTicker
     final theme = Theme.of(context);
     final laundryState = ref.watch(laundryViewModelProvider);
 
+    // Viewmodel'den gelen tab yönlendirme isteğini tek seferlik tut
+    ref.listen<LaundryState>(laundryViewModelProvider, (previous, next) {
+      if (next.initialTabIndex != 0 &&
+          next.initialTabIndex != _tabController.index) {
+        _tabController.animateTo(next.initialTabIndex);
+        // Tüketildi, sıfırla
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(laundryViewModelProvider.notifier).resetTabIndex();
+        });
+      }
+    });
+
     if (laundryState.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),

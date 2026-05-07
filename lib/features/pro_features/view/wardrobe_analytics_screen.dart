@@ -113,32 +113,35 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
   }
 
   Widget _buildSummaryCard(ThemeData theme, int total) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16), // Küçültüldü
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xFF0A1939), const Color(0xFF1A3263)]
+              : [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
         ),
-        borderRadius: BorderRadius.circular(20), // Küçültüldü
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.5 : 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12), // Küçültüldü
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.checkroom_rounded, color: Colors.white, size: 28), // Küçültüldü
+            child: const Icon(Icons.checkroom_rounded, color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -147,11 +150,11 @@ class WardrobeAnalyticsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Toplam Kıyafet',
-                  style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500), // Küçültüldü
+                  style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   '$total',
-                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold), // Küçültüldü
+                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

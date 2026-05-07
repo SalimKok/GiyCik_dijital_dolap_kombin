@@ -8,22 +8,27 @@ class LaundryState {
   final bool isLoading;
   final List<LaundryItem> items;
   final String? error;
+  /// Hangi tab'ın açılacağını belirtir: 0 = Temiz, 1 = Kirli
+  final int initialTabIndex;
 
   LaundryState({
     this.isLoading = false,
     this.items = const [],
     this.error,
+    this.initialTabIndex = 0,
   });
 
   LaundryState copyWith({
     bool? isLoading,
     List<LaundryItem>? items,
     String? error,
+    int? initialTabIndex,
   }) {
     return LaundryState(
       isLoading: isLoading ?? this.isLoading,
       items: items ?? this.items,
       error: error,
+      initialTabIndex: initialTabIndex ?? this.initialTabIndex,
     );
   }
 
@@ -88,6 +93,16 @@ class LaundryViewModel extends Notifier<LaundryState> {
   void moveToNeedsWash(String id) {
     final item = state.items.firstWhere((i) => i.id == id);
     _updateItemStatus(id, 'needsWash', LaundryStatus.needsWash, newWearCount: item.maxWear);
+  }
+
+  /// Kirli sekmesine yönlendirme isteği (LaundryScreen tarafından okunur)
+  void navigateToDirtyTab() {
+    state = state.copyWith(initialTabIndex: 1);
+  }
+
+  /// Tab yönlendirmesi tüketildikten sonra sıfırla
+  void resetTabIndex() {
+    state = state.copyWith(initialTabIndex: 0);
   }
 
   Future<void> incrementWear(String id) async {

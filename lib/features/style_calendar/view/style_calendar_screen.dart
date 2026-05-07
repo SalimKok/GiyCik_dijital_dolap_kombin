@@ -51,15 +51,6 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _showEventDialog(context);
-        },
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Not Ekle'),
-      ),
     );
   }
 
@@ -67,8 +58,19 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.surface,
+            theme.cardTheme.color ?? theme.colorScheme.surface,
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.cardTheme.shadowColor ?? theme.colorScheme.primary.withValues(alpha: 0.15),
@@ -148,7 +150,14 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
   Widget _buildEventList(ThemeData theme, StyleCalendarState calState, List events) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            theme.cardTheme.color ?? theme.colorScheme.surface,
+            theme.colorScheme.surface,
+          ],
+        ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
@@ -162,23 +171,31 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            padding: const EdgeInsets.fromLTRB(24, 24, 20, 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  DateFormat('d MMMM yyyy', 'tr_TR').format(calState.selectedDay!),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat('d MMMM yyyy', 'tr_TR').format(calState.selectedDay!),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${events.length} kayıt',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '${events.length} Kayıt',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                // Premium "Not Ekle" butonu
+                _AddNoteButton(onTap: () => _showEventDialog(context)),
               ],
             ),
           ),
@@ -248,7 +265,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
                   ),
                   child: Icon(
                     linkedOutfit != null ? Icons.checkroom_rounded : Icons.event_note_rounded,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -353,7 +370,7 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
           Icon(
             Icons.event_busy_rounded,
             size: 64,
-            color: theme.colorScheme.outline.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -623,6 +640,108 @@ class _StyleCalendarScreenState extends ConsumerState<StyleCalendarScreen> {
             child: const Text('Sil'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Premium gradient "Not Ekle" butonu
+class _AddNoteButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _AddNoteButton({required this.onTap});
+
+  @override
+  State<_AddNoteButton> createState() => _AddNoteButtonState();
+}
+
+class _AddNoteButtonState extends State<_AddNoteButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      lowerBound: 0.0,
+      upperBound: 0.08,
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.93).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) {
+        _ctrl.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _ctrl.reverse(),
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [
+                      const Color(0xFF1A3263),
+                      const Color(0xFF4A69B1),
+                    ]
+                  : [
+                      theme.colorScheme.primary,
+                      theme.colorScheme.primary.withValues(alpha: 0.75),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.4 : 0.3),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add_rounded, size: 16, color: Colors.white),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Not Ekle',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

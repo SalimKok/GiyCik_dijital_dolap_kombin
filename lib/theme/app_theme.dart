@@ -141,11 +141,11 @@ class AppTheme {
   static const Color _darkPrimary = Color(0xFFE0E0E0);       // Platin/Gümüş (Karanlık Modda Vurgu)
   static const Color _darkPrimaryContainer = Color(0xFFFFFFFF); // Parlak Gümüş
   static const Color _darkSurface = Color(0xFF0A1939);        // Daha Derin Safir Mavisi arka plan
-  static const Color _darkSurfaceVariant = Color(0xFF12234B); // Yüzeyler
+  static const Color _darkSurfaceVariant = Color(0xFF7B99E1); // Yüzeyler
   static const Color _darkOnSurface = Color(0xFFFFFFFF);     // Saf Beyaz metin
   static const Color _darkOnSurfaceVariant = Color(0xFFB0BEC5); // Gümüş/Gri
   static const Color _darkOutline = Color(0xFF2C4A87);       // Safir Çerçeve
-  static const Color _darkCardColor = Color(0xFF12234B);
+  static const Color _darkCardColor = Color(0xFF4A69B1);
 
   static ThemeData get darkTheme {
     return ThemeData(

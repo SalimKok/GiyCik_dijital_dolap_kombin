@@ -128,7 +128,8 @@ class HomeScreen extends ConsumerWidget {
               : 'Yok',
             color: Theme.of(context).colorScheme.primary,
             onTap: () {
-              // Hijyen sekmesi index 5
+              // Kirli tab'ına yönlendir, ardından Hijyen sekmesine (index 5) git
+              ref.read(laundryViewModelProvider.notifier).navigateToDirtyTab();
               ref.read(mainNavIndexProvider.notifier).navigate(5);
             },
           ),
@@ -190,7 +191,14 @@ class HomeScreen extends ConsumerWidget {
             aspectRatio: 1.0,
             child: Container(
               decoration: BoxDecoration(
-                color: theme.cardTheme.color,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.surface,
+                    theme.colorScheme.surfaceContainerHighest,
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -676,7 +684,14 @@ class _InfoCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.surface,
+            theme.colorScheme.surfaceContainerHighest,
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.3),
