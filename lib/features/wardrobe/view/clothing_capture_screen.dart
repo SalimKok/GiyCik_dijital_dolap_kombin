@@ -29,8 +29,8 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
   String? _selectedCategory = 'Üst';
   final List<String> _categories = ['Üst', 'Alt', 'Dış giyim', 'Ayakkabı', 'Aksesuar', 'Şal/Eşarp'];
   
-  String? _selectedSeason = 'Mevsimlik';
-  final List<String> _seasons = ['Yazlık', 'Kışlık', 'Mevsimlik'];
+  String? _selectedSeason = 'İlkbahar';
+  final List<String> _seasons = ['Yazlık', 'Kışlık', 'Sonbahar', 'İlkbahar'];
   
   File? _imageFile;
   String? _processedImageUrl; // DB url of the clean image
@@ -135,7 +135,7 @@ class _ClothingCaptureScreenState extends ConsumerState<ClothingCaptureScreen> {
         name: _nameController.text.trim(),
         category: _selectedCategory ?? 'Üst',
         color: _colorController.text.trim(),
-        season: _selectedSeason ?? 'Mevsimlik',
+        season: _selectedSeason ?? 'İlkbahar',
         imageUrl: _processedImageUrl, // Already uploaded and background removed
       );
 

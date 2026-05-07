@@ -22,7 +22,7 @@ class OutfitsState {
     this.selectedSeason = 'Hepsi',
     this.outfits = const [],
     this.styles = const ['Hepsi', 'Rahat', 'Şık', 'Sportif', 'Minimalist', 'Bohem', 'Klasik'],
-    this.seasons = const ['Hepsi', 'İlkbahar', 'Yaz', 'Sonbahar', 'Kış', 'Mevsimlik'],
+    this.seasons = const ['Hepsi', 'Yazlık', 'Kışlık', 'Sonbahar', 'İlkbahar'],
     this.error,
   });
 

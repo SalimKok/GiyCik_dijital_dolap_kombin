@@ -171,9 +171,9 @@ class HomeViewModel extends Notifier<HomeState> {
       // Mevsimi ayarla
       final month = DateTime.now().month;
       String season = 'İlkbahar';
-      if (month >= 6 && month <= 8) season = 'Yaz';
+      if (month >= 6 && month <= 8) season = 'Yazlık';
       else if (month >= 9 && month <= 11) season = 'Sonbahar';
-      else if (month == 12 || month <= 2) season = 'Kış';
+      else if (month == 12 || month <= 2) season = 'Kışlık';
 
       final recommendation = await _outfitRepo.generateAIOutfit(
         season: season,

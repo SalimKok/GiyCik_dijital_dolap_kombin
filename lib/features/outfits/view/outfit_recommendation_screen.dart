@@ -73,9 +73,9 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         // Mevsim hesaplama
         final month = DateTime.now().month;
         if (month >= 3 && month <= 5) _selectedSeason = 'İlkbahar';
-        else if (month >= 6 && month <= 8) _selectedSeason = 'Yaz';
+        else if (month >= 6 && month <= 8) _selectedSeason = 'Yazlık';
         else if (month >= 9 && month <= 11) _selectedSeason = 'Sonbahar';
-        else _selectedSeason = 'Kış';
+        else _selectedSeason = 'Kışlık';
       });
     }
   }
@@ -185,7 +185,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
           _buildDropdown(
             label: 'Mevsim',
             value: _selectedSeason,
-            items: ['İlkbahar', 'Yaz', 'Sonbahar', 'Kış'],
+            items: ['Yazlık', 'Kışlık', 'Sonbahar', 'İlkbahar'],
             onChanged: (val) => setState(() => _selectedSeason = val),
             icon: Icons.filter_drama_rounded,
           ),
@@ -318,7 +318,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         id: const Uuid().v4(),
         title: _aiRecommendation!['title'] ?? 'AI Kombini',
         style: _selectedStyle ?? 'Rahat',
-        season: _selectedSeason ?? 'Mevsimlik',
+        season: _selectedSeason ?? 'İlkbahar',
         items: items,
       );
 
@@ -587,7 +587,7 @@ class _OutfitRecommendationScreenState extends ConsumerState<OutfitRecommendatio
         id: widget.editingOutfit?.id ?? const Uuid().v4(),
         title: _manualTitleController.text.trim(),
         style: widget.editingOutfit?.style ?? 'Günlük',
-        season: widget.editingOutfit?.season ?? 'Mevsimlik',
+        season: widget.editingOutfit?.season ?? 'İlkbahar',
         isFavorite: widget.editingOutfit?.isFavorite ?? false,
         items: items,
       );
