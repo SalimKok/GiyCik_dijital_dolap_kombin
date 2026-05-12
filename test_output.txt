@@ -1,0 +1,94 @@
+00:00 +0: loading C:/FlutterOrnekler/gircik/test/widgets/e2e_calendar_flow_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: E2E Flow: Home -> Calendar -> Add Event
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 32 pixels on the right.
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#5505e DISPOSED:
+  creator: MultiChildRenderObjectElement#cdcaa(DEFUNCT) ←
+    SingleChildRenderObjectElement#55575(DEFUNCT) ← SingleChildRenderObjectElement#8096e(DEFUNCT) ←
+    SingleChildRenderObjectElement#655d7(DEFUNCT) ← StatelessElement#dd21f(DEFUNCT) ←
+    SingleChildRenderObjectElement#23a06(DEFUNCT) ← SingleChildRenderObjectElement#8cce3(DEFUNCT) ←
+    StatefulElement#e1bfe(DEFUNCT) ← StatelessElement#1bbed(DEFUNCT) ←
+    SingleChildRenderObjectElement#9a92a(DEFUNCT) ← InheritedElement#ad4e5(DEFUNCT) ←
+    SingleChildRenderObjectElement#a540e(DEFUNCT) ← ⋯
+  parentData: offset=Offset(11.0, 7.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=76.0, 0.0<=h<=42.0)
+  size: Size(54.6, 16.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -1: E2E Flow: Home -> Calendar -> Add Event [E]
+  Test failed. See exception logs above.
+  The test description was: E2E Flow: Home -> Calendar -> Add Event
+  
+══╡ EXCEPTION CAUGHT BY WIDGET INSPECTOR ╞══════════════════════════════════════════════════════════
+The following assertion was thrown:
+Looking up a deactivated widget's ancestor is unsafe.
+At this point the state of the widget's element tree is no longer stable.
+To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by
+calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+
+When the exception was thrown, this was the stack:
+#0      Element._debugCheckStateIsActiveForAncestorLookup.<anonymous closure> (package:flutter/src/widgets/framework.dart:4945:9)
+#1      Element._debugCheckStateIsActiveForAncestorLookup (package:flutter/src/widgets/framework.dart:4959:6)
+#2      Element.visitAncestorElements (package:flutter/src/widgets/framework.dart:5071:12)
+#3      _describeRelevantUserCode (package:flutter/src/widgets/widget_inspector.dart:4119:13)
+#4      _parseDiagnosticsNode (package:flutter/src/widgets/widget_inspector.dart:4037:12)
+#5      debugTransformDebugCreator (package:flutter/src/widgets/widget_inspector.dart:4016:21)
+#6      _FlutterErrorDetailsNode.builder (package:flutter/src/foundation/assertions.dart:1311:31)
+#7      DiagnosticableNode.getProperties (package:flutter/src/foundation/diagnostics.dart:2944:68)
+#8      TextTreeRenderer._debugRender (package:flutter/src/foundation/diagnostics.dart:1270:63)
+#9      TextTreeRenderer.render (package:flutter/src/foundation/diagnostics.dart:1137:14)
+#10     FlutterError.dumpErrorToConsole (package:flutter/src/foundation/assertions.dart:1041:13)
+#11     _defaultTestExceptionReporter (package:flutter_test/src/test_exception_reporter.dart:29:16)
+#12     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:821:28)
+<asynchronous suspension>
+(elided 8 frames from dart:async and package:stack_trace)
+
+This exception was caught while trying to describe the user-relevant code of another error.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY WIDGET INSPECTOR ╞══════════════════════════════════════════════════════════
+The following assertion was thrown:
+Looking up a deactivated widget's ancestor is unsafe.
+At this point the state of the widget's element tree is no longer stable.
+To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by
+calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+
+When the exception was thrown, this was the stack:
+#0      Element._debugCheckStateIsActiveForAncestorLookup.<anonymous closure> (package:flutter/src/widgets/framework.dart:4945:9)
+#1      Element._debugCheckStateIsActiveForAncestorLookup (package:flutter/src/widgets/framework.dart:4959:6)
+#2      Element.visitAncestorElements (package:flutter/src/widgets/framework.dart:5071:12)
+#3      _describeRelevantUserCode (package:flutter/src/widgets/widget_inspector.dart:4119:13)
+#4      _parseDiagnosticsNode (package:flutter/src/widgets/widget_inspector.dart:4037:12)
+#5      debugTransformDebugCreator (package:flutter/src/widgets/widget_inspector.dart:4016:21)
+#6      _FlutterErrorDetailsNode.builder (package:flutter/src/foundation/assertions.dart:1311:31)
+#7      DiagnosticableNode.emptyBodyDescription (package:flutter/src/foundation/diagnostics.dart:2940:45)
+#8      TextTreeRenderer._debugRender (package:flutter/src/foundation/diagnostics.dart:1307:14)
+#9      TextTreeRenderer.render (package:flutter/src/foundation/diagnostics.dart:1137:14)
+#10     FlutterError.dumpErrorToConsole (package:flutter/src/foundation/assertions.dart:1041:13)
+#11     _defaultTestExceptionReporter (package:flutter_test/src/test_exception_reporter.dart:29:16)
+#12     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:821:28)
+<asynchronous suspension>
+(elided 8 frames from dart:async and package:stack_trace)
+
+This exception was caught while trying to describe the user-relevant code of another error.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -1: (tearDownAll)
+00:01 +0 -1: Some tests failed.

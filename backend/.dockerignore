@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+firebase_credentials.json
+.git
+.gitignore
+.dockerignore
+*.db

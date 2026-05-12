@@ -13,11 +13,26 @@ from app.models.subscription import Subscription
 
 logger = logging.getLogger(__name__)
 
-# Mock initialization of Firebase (In a real app, you need a valid JSON key)
+import os
+import json
+
+# Initialize Firebase
 try:
     if not firebase_admin._apps:
-         # JSON dosyasının yolunu belirtin
-        cred = credentials.Certificate('firebase_credentials.json')
+        firebase_env = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+        if firebase_env:
+            try:
+                cred_dict = json.loads(firebase_env)
+                cred = credentials.Certificate(cred_dict)
+                logger.info("Firebase credentials loaded from environment variables.")
+            except Exception as json_e:
+                logger.error(f"Failed to parse FIREBASE_CREDENTIALS_JSON: {json_e}")
+                cred = credentials.Certificate('firebase_credentials.json')
+        else:
+             # Fallback to local JSON file for development
+            cred = credentials.Certificate('firebase_credentials.json')
+            logger.info("Firebase credentials loaded from local file.")
+            
         firebase_admin.initialize_app(cred)
         logger.info("Firebase başarıyla başlatıldı.")
 except Exception as e:
