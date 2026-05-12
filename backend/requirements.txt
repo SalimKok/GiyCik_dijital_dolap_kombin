@@ -11,3 +11,6 @@ alembic
 firebase-admin
 apscheduler
 google-genai
+rembg
+Pillow
+pydantic-settings
