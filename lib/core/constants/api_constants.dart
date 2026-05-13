@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class ApiConstants {
   // Canlı (Production) Sunucu Adresi
   static String get baseUrl {
-    return 'https://giycik-api.onrender.com/api';
+    return 'https://giycikdijitaldolapkombin-production.up.railway.app/api';
   }
   
   // Storage Keys
