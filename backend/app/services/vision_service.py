@@ -2,12 +2,6 @@ import json
 import io
 from PIL import Image
 
-try:
-    from rembg import remove
-except ImportError:
-    # Fallback to prevent crash if rembg is not fully installed yet in some environments
-    def remove(data): return data
-
 from google import genai
 from app.config import settings
 
@@ -19,8 +13,12 @@ if settings.GEMINI_API_KEY:
 def remove_background(image_bytes: bytes) -> bytes:
     """Removes the background from an image using rembg."""
     try:
+        from rembg import remove
         output = remove(image_bytes)
         return output
+    except ImportError:
+        print("rembg is not installed.")
+        return image_bytes
     except Exception as e:
         print(f"Background removal failed: {e}")
         return image_bytes
