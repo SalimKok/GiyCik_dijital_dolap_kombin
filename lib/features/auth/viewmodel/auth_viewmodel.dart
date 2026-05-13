@@ -98,6 +98,14 @@ class AuthViewModel extends Notifier<AuthState> {
         await prefs.remove(_keyLoggedIn);
       }
 
+      // Kullanıcı adını hemen çekip cache'le (splash ekranında göstermek için)
+      try {
+        final user = await ref.read(authRepositoryProvider).getCurrentUser();
+        await prefs.setString('cached_user_name', user.name);
+      } catch (_) {
+        // Cache başarısız olursa sorun değil, home_viewmodel zaten tekrar deneyecek
+      }
+
       try {
         await ref.read(notificationServiceProvider).initialize();
       } catch (e) {
@@ -121,6 +129,9 @@ class AuthViewModel extends Notifier<AuthState> {
       await prefs.setBool(_keyRememberMe, true);
       await prefs.setBool(_keyLoggedIn, true);
 
+      // Kullanıcı adını cache'le (splash ekranında hemen göstermek için)
+      await prefs.setString('cached_user_name', name);
+
       try {
         await ref.read(notificationServiceProvider).initialize();
       } catch (e) {
@@ -138,9 +149,10 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<void> logout() async {
     await ref.read(authRepositoryProvider).logout();
     final prefs = await SharedPreferences.getInstance();
-    // Çıkış yapınca hem oturumu hem de "Beni Hatırla" flag'ini temizle
+    // Çıkış yapınca hem oturumu hem de "Beni Hatırla" flag'ini ve cache'i temizle
     await prefs.remove(_keyLoggedIn);
     await prefs.remove(_keyRememberMe);
+    await prefs.remove('cached_user_name');
     state = state.copyWith(status: AuthStatus.unauthenticated, hasSeenSplash: false);
   }
 
@@ -153,6 +165,7 @@ class AuthViewModel extends Notifier<AuthState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyLoggedIn);
     await prefs.remove(_keyRememberMe);
+    await prefs.remove('cached_user_name');
     state = state.copyWith(status: AuthStatus.unauthenticated);
   }
 }

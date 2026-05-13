@@ -47,3 +47,14 @@ app.include_router(travel.router, prefix="/api/travel", tags=["Travel Plans"])
 @app.get("/")
 async def root():
     return {"message": "Welcome to GiyÇık API"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Render and keep-alive cron jobs."""
+    from app.config import settings
+    return {
+        "status": "healthy",
+        "database": "configured" if settings.DATABASE_URL else "missing",
+        "gemini_ai": "configured" if settings.GEMINI_API_KEY else "not configured",
+    }
+

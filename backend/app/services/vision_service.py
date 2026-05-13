@@ -25,8 +25,8 @@ def remove_background(image_bytes: bytes) -> bytes:
 
 def analyze_clothing(image_bytes: bytes) -> dict:
     """Analyzes clothing image using Google Gemini API."""
-    if not settings.GEMINI_API_KEY:
-        print("GEMINI_API_KEY is missing. Returning default fallback analysis.")
+    if not client:
+        print("GEMINI_API_KEY is missing or Gemini client failed to initialize. Returning default fallback analysis.")
         return {"category": "Üst", "color": "Bilinmiyor", "season": "Mevsimlik", "name": "Kıyafet"}
         
     try:
@@ -58,9 +58,9 @@ def analyze_clothing(image_bytes: bytes) -> dict:
 
 def generate_outfit(wardrobe_items: list, season: str, weather: str, event: str, style: str, is_hijab: bool = False) -> dict:
     """Generates an outfit from given wardrobe items based on conditions using Gemini."""
-    if not settings.GEMINI_API_KEY:
-        print("GEMINI_API_KEY is missing. Cannot generate outfit.")
-        return {}
+    if not client:
+        print("GEMINI_API_KEY is missing or Gemini client not initialized. Cannot generate outfit.")
+        return {"error": "Yapay zeka servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."}
 
     try:
         # Prepare wardrobe data string
@@ -114,9 +114,9 @@ def generate_outfit(wardrobe_items: list, season: str, weather: str, event: str,
 
 def generate_travel_pack(wardrobe_items: list, destination: str, start_date: str, end_date: str, purpose: str, is_hijab: bool = False) -> dict:
     """Generates a travel packing list and daily outfits based on destination and purpose."""
-    if not settings.GEMINI_API_KEY:
-        print("GEMINI_API_KEY is missing. Cannot generate travel pack.")
-        return {}
+    if not client:
+        print("GEMINI_API_KEY is missing or Gemini client not initialized. Cannot generate travel pack.")
+        return {"error": "Yapay zeka servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."}
 
     try:
         items_str = ""

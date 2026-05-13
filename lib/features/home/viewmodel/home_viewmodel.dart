@@ -73,17 +73,35 @@ class HomeViewModel extends Notifier<HomeState> {
     _weatherService = ref.watch(weatherServiceProvider);
     _outfitRepo = ref.watch(outfitRepositoryProvider);
     
+    // Hemen cache'den kullanıcı adını yükle (API'yi beklemeden)
+    _loadCachedUserName();
+    
     // Initial fetch when ViewModel is created
     Future.microtask(() => loadHomeData());
     return HomeState(isLoading: true);
   }
 
+  Future<void> _loadCachedUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedName = prefs.getString('cached_user_name');
+    if (cachedName != null && cachedName.isNotEmpty) {
+      state = state.copyWith(userName: cachedName);
+    }
+  }
+
   Future<void> loadHomeData() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _authRepo.getCurrentUser();
-      final laundryItems = await _laundryRepo.getLaundryItems();
-      final calendarEvents = await _calendarRepo.getEvents();
+      // Paralel API çağrıları - 3x daha hızlı
+      final results = await Future.wait([
+        _authRepo.getCurrentUser(),
+        _laundryRepo.getLaundryItems(),
+        _calendarRepo.getEvents(),
+      ]);
+
+      final user = results[0] as dynamic;
+      final laundryItems = results[1] as List;
+      final calendarEvents = results[2] as List;
 
       final needsWashCount = laundryItems.where((i) => i.status.name == 'needsWash').length;
       
@@ -106,6 +124,10 @@ class HomeViewModel extends Notifier<HomeState> {
           nextEventTime = '${diff.inDays} gün sonra:';
         }
       }
+
+      // Kullanıcı adını cache'e kaydet
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cached_user_name', user.name);
 
       state = state.copyWith(
         isLoading: false,
