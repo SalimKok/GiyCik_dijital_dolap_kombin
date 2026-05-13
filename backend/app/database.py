@@ -1,4 +1,5 @@
 from typing import AsyncGenerator
+from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
@@ -7,6 +8,7 @@ from app.config import settings
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=True, # Log SQL queries in dev
+    poolclass=NullPool,
     connect_args={
         "prepared_statement_cache_size": 0,
         "statement_cache_size": 0,
