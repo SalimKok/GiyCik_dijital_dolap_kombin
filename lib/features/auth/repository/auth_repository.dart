@@ -37,7 +37,12 @@ class AuthRepository {
         },
       );
       
-      return User.fromJson(response.data);
+      final user = User.fromJson(response.data);
+      
+      // Kayıt başarılı olduktan sonra otomatik giriş yapıp token'ı kaydet
+      await login(email, password);
+      
+      return user;
     } catch (e) {
       throw Exception('Kayıt başarısız: \${_handleError(e)}');
     }

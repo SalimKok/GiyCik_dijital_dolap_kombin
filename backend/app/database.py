@@ -6,15 +6,7 @@ from app.config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=False,  # Canlıda SQL loglamasını kapat
-    pool_size=5,
-    max_overflow=10,
-    pool_timeout=30,
-    pool_recycle=1800,  # 30 dakikada bir bağlantıları yenile
-    connect_args={
-        "prepared_statement_cache_size": 0,
-        "statement_cache_size": 0,
-    }
+    echo=True, # Log SQL queries in dev
 )
 
 AsyncSessionLocal = async_sessionmaker(

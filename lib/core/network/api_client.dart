@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gircik/core/constants/api_constants.dart';
 
 class ApiClient {
@@ -19,9 +20,16 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Add JWT token to headers if available
-          final token = await _storage.read(key: ApiConstants.tokenKey);
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          try {
+            final token = await _storage.read(key: ApiConstants.tokenKey);
+            if (token != null && token.isNotEmpty) {
+              debugPrint("Token found in storage, adding to header: \${token.substring(0, 10)}...");
+              options.headers['Authorization'] = 'Bearer $token';
+            } else {
+              debugPrint("No token found in storage for request to: \${options.path}");
+            }
+          } catch (e) {
+            debugPrint("Error reading token from storage: $e");
           }
           return handler.next(options);
         },
@@ -38,6 +46,18 @@ class ApiClient {
         },
       ),
     );
+    
+    // Geliştirme aşamasında logları görmek için:
+    if (kDebugMode) {
+      _dio.interceptors.add(LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: false,
+        responseBody: true,
+        error: true,
+      ));
+    }
   }
 
   Dio get client => _dio;

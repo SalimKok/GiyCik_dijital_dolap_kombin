@@ -11,6 +11,3 @@ alembic
 firebase-admin
 apscheduler
 google-genai
-rembg[cpu]
-Pillow
-pydantic-settings
