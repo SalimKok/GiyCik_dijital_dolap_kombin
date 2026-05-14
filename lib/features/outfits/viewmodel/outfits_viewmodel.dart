@@ -62,7 +62,7 @@ class OutfitsState {
 
 // ViewModel (Notifier)
 class OutfitsViewModel extends Notifier<OutfitsState> {
-  late final OutfitRepository _repository;
+  late OutfitRepository _repository;
 
   @override
   OutfitsState build() {

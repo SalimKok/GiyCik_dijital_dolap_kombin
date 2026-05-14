@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // Ana renk paleti - Safir ve Platin Şıklığı (Açık Mod)
-  static const Color _primary = Color(0xFF0D224D);      // Derin Safir Mavisi (Butonlar ve Vurgular)
-  static const Color _primaryLight = Color(0xFF1A3263); // Safir açığı
-  static const Color _surface = Color(0xFFF8F9FA);      // Kırık Beyaz (Arka Plan)
-  static const Color _surfaceVariant = Color(0xFFFFFFff); // Yüzeyler (Saf Beyaz Kartlar)
-  static const Color _onSurface = Color(0xFF0D224D);   // Koyu Safir (Ana Metin)
-  static const Color _onSurfaceVariant = Color(0xFF4D64A0); // Gri/Mavi (ikincil metin)
-  static const Color _outline = Color(0xFF9EB0E6); // Platin/Gümüş (Çerçeveler)
+  // Ana renk paleti
+  static const Color _primary = Color(0xFF0D224D);
+  static const Color _primaryLight = Color(0xFF1A3263);
+  static const Color _surface = Color(0xFFF8F9FA);
+  static const Color _surfaceVariant = Color(0xFFFFFFff);
+  static const Color _onSurface = Color(0xFF0D224D);
+  static const Color _onSurfaceVariant = Color(0xFF4D64A0);
+  static const Color _outline = Color(0xFF9EB0E6);
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -138,13 +138,13 @@ class AppTheme {
   }
 
   // ── Koyu Tema ──────────────────────────────────────────────
-  static const Color _darkPrimary = Color(0xFFE0E0E0);       // Platin/Gümüş (Karanlık Modda Vurgu)
-  static const Color _darkPrimaryContainer = Color(0xFFFFFFFF); // Parlak Gümüş
-  static const Color _darkSurface = Color(0xFF0A1939);        // Daha Derin Safir Mavisi arka plan
-  static const Color _darkSurfaceVariant = Color(0xFF7B99E1); // Yüzeyler
-  static const Color _darkOnSurface = Color(0xFFFFFFFF);     // Saf Beyaz metin
-  static const Color _darkOnSurfaceVariant = Color(0xFFB0BEC5); // Gümüş/Gri
-  static const Color _darkOutline = Color(0xFF2C4A87);       // Safir Çerçeve
+  static const Color _darkPrimary = Color(0xFFE0E0E0);
+  static const Color _darkPrimaryContainer = Color(0xFFFFFFFF);
+  static const Color _darkSurface = Color(0xFF0A1939);
+  static const Color _darkSurfaceVariant = Color(0xFF7B99E1);
+  static const Color _darkOnSurface = Color(0xFFFFFFFF);
+  static const Color _darkOnSurfaceVariant = Color(0xFFB0BEC5);
+  static const Color _darkOutline = Color(0xFF2C4A87);
   static const Color _darkCardColor = Color(0xFF4A69B1);
 
   static ThemeData get darkTheme {

@@ -47,7 +47,7 @@ class StyleCalendarState {
 
 // ViewModel (Notifier)
 class StyleCalendarViewModel extends Notifier<StyleCalendarState> {
-  late final CalendarRepository _repository;
+  late CalendarRepository _repository;
 
   @override
   StyleCalendarState build() {

@@ -2,6 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gircik/features/auth/repository/auth_repository.dart';
 import 'package:gircik/core/services/notification_service.dart';
+import 'package:gircik/features/home/viewmodel/home_viewmodel.dart';
+import 'package:gircik/features/wardrobe/viewmodel/wardrobe_viewmodel.dart';
+import 'package:gircik/features/laundry/viewmodel/laundry_viewmodel.dart';
+import 'package:gircik/features/outfits/viewmodel/outfits_viewmodel.dart';
+import 'package:gircik/features/style_calendar/viewmodel/style_calendar_viewmodel.dart';
+import 'package:gircik/features/settings/viewmodel/settings_viewmodel.dart';
+import 'package:gircik/features/travel/viewmodel/travel_viewmodel.dart';
+import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.dart';
+import 'package:gircik/core/providers/navigation_provider.dart';
 
 enum AuthStatus { initial, authenticated, unauthenticated }
 
@@ -177,6 +186,18 @@ class AuthViewModel extends Notifier<AuthState> {
     await prefs.remove(_keyLoggedIn);
     await prefs.remove(_keyRememberMe);
     await prefs.remove('cached_user_name');
+    
+    // Eski kullanıcının verilerini temizlemek için tüm global state'leri sıfırla
+    ref.invalidate(homeViewModelProvider);
+    ref.invalidate(wardrobeViewModelProvider);
+    ref.invalidate(laundryViewModelProvider);
+    ref.invalidate(outfitsViewModelProvider);
+    ref.invalidate(styleCalendarViewModelProvider);
+    ref.invalidate(settingsViewModelProvider);
+    ref.invalidate(travelViewModelProvider);
+    ref.invalidate(subscriptionProvider);
+    ref.invalidate(mainNavIndexProvider);
+
     state = state.copyWith(status: AuthStatus.unauthenticated, hasSeenSplash: false);
   }
 

@@ -59,11 +59,11 @@ class HomeState {
 
 // ViewModel (Notifier)
 class HomeViewModel extends Notifier<HomeState> {
-  late final AuthRepository _authRepo;
-  late final LaundryRepository _laundryRepo;
-  late final CalendarRepository _calendarRepo;
-  late final WeatherService _weatherService;
-  late final OutfitRepository _outfitRepo;
+  late AuthRepository _authRepo;
+  late LaundryRepository _laundryRepo;
+  late CalendarRepository _calendarRepo;
+  late WeatherService _weatherService;
+  late OutfitRepository _outfitRepo;
 
   @override
   HomeState build() {

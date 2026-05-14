@@ -19,7 +19,7 @@ class TravelState {
 }
 
 class TravelViewModel extends Notifier<TravelState> {
-  late final TravelRepository _repository;
+  late TravelRepository _repository;
 
   @override
   TravelState build() {

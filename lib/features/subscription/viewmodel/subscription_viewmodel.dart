@@ -3,7 +3,7 @@ import 'package:gircik/data/models/subscription.dart';
 import 'package:gircik/features/subscription/repository/subscription_repository.dart';
 
 class SubscriptionViewModel extends Notifier<Subscription> {
-  late final SubscriptionRepository _repository;
+  late SubscriptionRepository _repository;
 
   @override
   Subscription build() {

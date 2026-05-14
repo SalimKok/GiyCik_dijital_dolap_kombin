@@ -44,7 +44,7 @@ class LaundryState {
 
 // ViewModel (Notifier)
 class LaundryViewModel extends Notifier<LaundryState> {
-  late final LaundryRepository _repository;
+  late LaundryRepository _repository;
 
   @override
   LaundryState build() {
