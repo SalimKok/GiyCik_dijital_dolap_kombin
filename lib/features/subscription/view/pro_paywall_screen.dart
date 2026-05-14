@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/data/models/subscription.dart';
 import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.dart';
 
+import 'package:gircik/features/subscription/view/widgets/already_pro_view.dart';
+import 'package:gircik/features/subscription/view/widgets/feature_item.dart';
+import 'package:gircik/features/subscription/view/widgets/paywall_hero_banner.dart';
+import 'package:gircik/features/subscription/view/widgets/plan_card.dart';
+
 class ProPaywallScreen extends ConsumerStatefulWidget {
   const ProPaywallScreen({super.key});
 
@@ -37,41 +42,8 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
     return Scaffold(
       body: SafeArea(
         child: subscription.isPro
-            ? _buildAlreadyPro(theme)
+            ? const AlreadyProView()
             : _buildPaywall(theme),
-      ),
-    );
-  }
-
-  Widget _buildAlreadyPro(ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_circle_rounded, size: 64, color: Colors.green),
-            ),
-            const SizedBox(height: 24),
-            Text('Zaten Pro\'sun! 🎉', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Text(
-              'Tüm özellikler sınırsız olarak aktif.',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 32),
-            OutlinedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Geri Dön'),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -100,34 +72,7 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
               const SizedBox(height: 12),
 
               // ── Hero banner ──
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        theme.colorScheme.primary.withValues(alpha: 0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.workspace_premium_rounded,
-                    size: 56,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              const PaywallHeroBanner(),
               const SizedBox(height: 28),
               Text(
                 'GiyÇık Pro',
@@ -146,41 +91,35 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
               const SizedBox(height: 36),
 
               // ── Özellik listesi ──
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.checkroom_rounded,
                 title: 'Sınırsız Kıyafet',
                 subtitle: 'Gardırobuna istediğin kadar kıyafet ekle',
-                theme: theme,
               ),
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.auto_awesome_rounded,
                 title: 'Sınırsız Kombin',
                 subtitle: 'İstediğin kadar kombin oluştur ve kaydet',
-                theme: theme,
               ),
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.psychology_rounded,
                 title: 'Sınırsız AI Önerisi',
                 subtitle: 'Yapay zeka ile hiçbir sınır olmadan kombin al',
-                theme: theme,
               ),
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.calendar_month_rounded,
                 title: 'Sınırsız Takvim',
                 subtitle: 'Etkinlik ve kombin planlarını sınırsız ekle',
-                theme: theme,
               ),
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.notifications_active_rounded,
                 title: 'İleri Düzey Bildirimler',
                 subtitle: 'Kişiselleştirilmiş akıllı bildirimler',
-                theme: theme,
               ),
-              _FeatureItem(
+              const FeatureItem(
                 icon: Icons.analytics_rounded,
                 title: 'Analitik ve İçgörüler',
                 subtitle: 'Gardırobuna dair detaylı istatistikler ve analizler',
-                theme: theme,
               ),
               const SizedBox(height: 32),
 
@@ -192,26 +131,24 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
               const SizedBox(height: 14),
 
               // Yıllık plan
-              _PlanCard(
+              PlanCard(
                 title: 'Yıllık',
                 price: '₺249,99 / yıl',
                 perMonth: '₺20,83 / ay',
                 badge: '%58 Tasarruf',
                 isSelected: _selectedPlan == SubscriptionPlan.yearly,
                 onTap: () => setState(() => _selectedPlan = SubscriptionPlan.yearly),
-                theme: theme,
               ),
               const SizedBox(height: 12),
 
               // Aylık plan
-              _PlanCard(
+              PlanCard(
                 title: 'Aylık',
                 price: '₺49,99 / ay',
                 perMonth: null,
                 badge: null,
                 isSelected: _selectedPlan == SubscriptionPlan.monthly,
                 onTap: () => setState(() => _selectedPlan = SubscriptionPlan.monthly),
-                theme: theme,
               ),
               const SizedBox(height: 28),
 
@@ -285,170 +222,6 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Yardımcı Widget'lar ──
-
-class _FeatureItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final ThemeData theme;
-
-  const _FeatureItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: theme.colorScheme.primary, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.check_circle_rounded, color: Colors.green.shade600, size: 22),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlanCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final String? perMonth;
-  final String? badge;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _PlanCard({
-    required this.title,
-    required this.price,
-    this.perMonth,
-    this.badge,
-    required this.isSelected,
-    required this.onTap,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.08)
-                : theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              // Radio
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                    width: 2,
-                  ),
-                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                ),
-                child: isSelected
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : null,
-              ),
-              const SizedBox(width: 14),
-              // Plan bilgisi
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          title,
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        if (badge != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              badge!,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      price,
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                    ),
-                    if (perMonth != null)
-                      Text(
-                        perMonth!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
