@@ -97,6 +97,32 @@ class AuthRepository {
     }
   }
 
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _apiClient.client.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
+    } catch (e) {
+      throw Exception('Şifre sıfırlama talebi başarısız: ${_handleError(e)}');
+    }
+  }
+
+  Future<void> resetPassword(String email, String code, String newPassword) async {
+    try {
+      await _apiClient.client.post(
+        '/auth/reset-password',
+        data: {
+          'email': email,
+          'code': code,
+          'new_password': newPassword,
+        },
+      );
+    } catch (e) {
+      throw Exception('Şifre yenileme başarısız: ${_handleError(e)}');
+    }
+  }
+
   String _handleError(dynamic error) {
     if (error is DioException) {
       if (error.response?.data != null && error.response?.data['detail'] != null) {

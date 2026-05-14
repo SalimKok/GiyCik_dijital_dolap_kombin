@@ -5,9 +5,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.user import User, UserCreate, UserUpdate, UserFCMUpdate
+from app.schemas.user import User, UserCreate, UserUpdate, UserFCMUpdate, ForgotPasswordRequest, ResetPasswordRequest
 from app.schemas.token import Token
-from app.services import auth_service, notification_service
+from app.services import auth_service, notification_service, email_service
 from app.utils.security import verify_password, create_access_token
 from app.utils.deps import get_current_user
 
@@ -85,3 +85,38 @@ async def delete_user_me(
 ) -> dict:
     await auth_service.delete_user(db, db_user=current_user)
     return {"status": "success"}
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    user = await auth_service.get_user_by_email(db, email=request.email)
+    if not user:
+        # Prevent email enumeration by returning success even if not found
+        return {"status": "success", "message": "E-posta gönderildi."}
+        
+    code = await auth_service.create_password_reset_code(db, request.email)
+    email_service.send_reset_code_email(request.email, code)
+    
+    return {"status": "success", "message": "E-posta gönderildi."}
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    success = await auth_service.verify_reset_code_and_update_password(
+        db=db,
+        email=request.email,
+        code=request.code,
+        new_password=request.new_password
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Geçersiz veya süresi dolmuş kod."
+        )
+        
+    return {"status": "success", "message": "Şifreniz başarıyla güncellendi."}

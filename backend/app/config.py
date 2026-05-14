@@ -6,6 +6,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     GEMINI_API_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200
+    
+    SMTP_SERVER: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
 
     class Config:
         env_file = ".env"

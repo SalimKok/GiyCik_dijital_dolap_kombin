@@ -146,6 +146,30 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> forgotPassword(String email) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await ref.read(authRepositoryProvider).forgotPassword(email);
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String code, String newPassword) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await ref.read(authRepositoryProvider).resetPassword(email, code, newPassword);
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await ref.read(authRepositoryProvider).logout();
     final prefs = await SharedPreferences.getInstance();

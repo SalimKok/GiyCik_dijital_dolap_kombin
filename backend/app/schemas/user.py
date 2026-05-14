@@ -20,6 +20,14 @@ class UserUpdate(BaseModel):
 class UserFCMUpdate(BaseModel):
     fcm_token: str
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
 class UserInDBBase(UserBase):
     id: int
     created_at: datetime

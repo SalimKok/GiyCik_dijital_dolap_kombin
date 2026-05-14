@@ -21,3 +21,12 @@ class User(Base):
     calendar_events = relationship("CalendarEvent", back_populates="user", cascade="all, delete-orphan")
     subscription = relationship("Subscription", back_populates="user", uselist=False, cascade="all, delete-orphan")
     travel_plans = relationship("TravelPlan", back_populates="user", cascade="all, delete-orphan")
+
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    code: Mapped[str] = mapped_column(String(10), nullable=False)
+    expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

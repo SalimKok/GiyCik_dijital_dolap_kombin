@@ -91,6 +91,10 @@ class HomeViewModel extends Notifier<HomeState> {
 
   Future<void> loadHomeData() async {
     state = state.copyWith(isLoading: true, error: null);
+    // Hava durumu ve cache işlemlerini UI'ı bloklamadan arka planda başlat
+    // Backend çağrılarından bağımsız olması için try bloğunun dışına alındı
+    _loadWeatherAndCache();
+
     try {
       // Paralel API çağrıları - 3x daha hızlı
       final results = await Future.wait([
@@ -136,9 +140,6 @@ class HomeViewModel extends Notifier<HomeState> {
         nextEventTitle: nextEventTitle,
         nextEventTime: nextEventTime,
       );
-
-      // Hava durumu ve cache işlemlerini UI'ı bloklamadan arka planda başlat
-      _loadWeatherAndCache();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
