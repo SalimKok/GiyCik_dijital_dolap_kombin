@@ -5,7 +5,6 @@ from PIL import Image
 try:
     from rembg import remove
 except ImportError:
-    # Fallback to prevent crash if rembg is not fully installed yet in some environments
     def remove(data): return data
 
 from google import genai

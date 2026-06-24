@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 from sqlalchemy import select
-
 from app.database import get_db
 from app.schemas.clothing import ClothingItem, ClothingItemCreate, ClothingItemUpdate
 from app.schemas.user import User

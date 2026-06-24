@@ -1,0 +1,14 @@
+# Backend
+backend/.env
+backend/firebase_credentials.json
+backend/venv/
+backend/**/__pycache__/
+backup.sql
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,61 +1,30 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Backend related
+# ──────────── Backend ────────────
 backend/.env
+backend/firebase_credentials.json
 backend/venv/
 backend/__pycache__/
-*.pyc
-.env
-firebase_credentials.json
-backend/firebase_credentials.json
-# Firebase Secret Files
-android/app/google-services.json
-lib/firebase_options.dart
+backend/app/__pycache__/
+backend/**/__pycache__/
+backup.sql
 
-# Keystore and Passwords
-android/app/upload-keystore.jks
+# ──────────── Flutter ────────────
+*.dart_tool/
+.packages
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ──────────── IDE ────────────
+.idea/
+.vscode/
+*.iml
+
+# ──────────── OS ────────────
+.DS_Store
+Thumbs.db
+
+# ──────────── Secrets ────────────
+*.jks
+*.keystore
 key.properties

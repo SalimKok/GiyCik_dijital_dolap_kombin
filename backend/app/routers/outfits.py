@@ -2,7 +2,6 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
-
 from app.database import get_db
 from app.schemas.outfit import Outfit, OutfitCreate, OutfitUpdate
 from app.schemas.laundry import LaundryItemUpdate
