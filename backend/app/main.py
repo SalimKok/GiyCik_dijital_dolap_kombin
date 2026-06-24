@@ -38,7 +38,7 @@ app = FastAPI(
 _allowed_origins = ["*"] if not settings.is_production else [
     "https://giycik.com",
     "https://www.giycik.com",
-    "https://giycik-api.onrender.com",
+    "https://giycik-api-gb34.onrender.com",
 ]
 
 app.add_middleware(
@@ -52,7 +52,7 @@ app.add_middleware(
 if settings.is_production:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["giycik-api.onrender.com", "*.onrender.com"],
+        allowed_hosts=["giycik-api-gb34.onrender.com", "*.onrender.com"],
     )
 
 # Include routers

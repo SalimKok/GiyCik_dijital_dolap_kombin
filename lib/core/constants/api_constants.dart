@@ -6,7 +6,7 @@ class ApiConstants {
   // Set this to your deployed backend URL before building a release.
   // Example: https://giycik-api.onrender.com/api
   // ──────────────────────────────────────────────
-  static const String productionBaseUrl = 'https://giycik-api.onrender.com/api';
+  static const String productionBaseUrl = 'https://giycik-api-gb34.onrender.com/api';
 
   /// Development base URL (auto-detected per platform)
   static String get _devBaseUrl {
