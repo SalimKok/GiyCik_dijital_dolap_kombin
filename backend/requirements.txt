@@ -6,7 +6,6 @@ uvicorn[standard]==0.34.*
 sqlalchemy==2.0.*
 asyncpg
 alembic
-psycopg2-binary
 
 # === Authentication & Security ===
 pydantic[email]==2.*
@@ -24,12 +23,9 @@ firebase-admin
 # === AI & Image Processing ===
 google-genai
 Pillow
-rembg
 
 # === Scheduling ===
 apscheduler
-
-# === Email (stdlib smtplib is used, no extra package needed) ===
 
 # === Production Server ===
 gunicorn
