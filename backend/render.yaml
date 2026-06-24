@@ -1,18 +1,18 @@
-# Render Blueprint – Auto-deploy configuration
+# Render Blueprint – Free Tier Configuration
 # https://render.com/docs/blueprint-spec
 
 services:
   - type: web
     name: giycik-api
     runtime: python
-    region: frankfurt  # eu-central
-    plan: starter
+    region: frankfurt
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false  # Set manually on Render dashboard
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
@@ -31,9 +31,3 @@ services:
         value: production
       - key: PYTHON_VERSION
         value: "3.12.3"
-
-databases:
-  - name: giycik-db
-    plan: starter
-    databaseName: gircik
-    region: frankfurt
