@@ -11,6 +11,7 @@ engine = create_async_engine(
     max_overflow=10,
     pool_pre_ping=True,  # Verify connections before using them
     pool_recycle=300,     # Recycle connections every 5 minutes
+    connect_args={"prepared_statement_cache_size": 0}, # Fix for Supabase pgBouncer
 )
 
 AsyncSessionLocal = async_sessionmaker(
