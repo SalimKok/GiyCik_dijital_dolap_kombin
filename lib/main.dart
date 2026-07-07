@@ -5,13 +5,16 @@ import 'package:gircik/theme/theme_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:gircik/core/services/revenue_cat_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Firebase.apps.isEmpty) {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-}
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  }
+
+  await RevenueCatService.initialize();
 
   runApp(
     const ProviderScope(

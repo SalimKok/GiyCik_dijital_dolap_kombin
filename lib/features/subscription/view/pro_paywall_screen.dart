@@ -7,6 +7,8 @@ import 'package:gircik/features/subscription/view/widgets/already_pro_view.dart'
 import 'package:gircik/features/subscription/view/widgets/feature_item.dart';
 import 'package:gircik/features/subscription/view/widgets/paywall_hero_banner.dart';
 import 'package:gircik/features/subscription/view/widgets/plan_card.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:gircik/core/services/revenue_cat_service.dart';
 
 class ProPaywallScreen extends ConsumerStatefulWidget {
   const ProPaywallScreen({super.key});
@@ -17,22 +19,52 @@ class ProPaywallScreen extends ConsumerStatefulWidget {
 
 class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
   bool _isLoading = false;
-  SubscriptionPlan _selectedPlan = SubscriptionPlan.yearly;
+  Offerings? _offerings;
+  Package? _selectedPackage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOfferings();
+  }
+
+  Future<void> _fetchOfferings() async {
+    setState(() => _isLoading = true);
+    final offerings = await RevenueCatService.getOfferings();
+    if (mounted) {
+      setState(() {
+        _offerings = offerings;
+        _isLoading = false;
+        if (offerings != null && offerings.current != null && offerings.current!.availablePackages.isNotEmpty) {
+          _selectedPackage = offerings.current!.availablePackages.first;
+        }
+      });
+    }
+  }
 
   Future<void> _purchase() async {
+    if (_selectedPackage == null) return;
+    
     setState(() => _isLoading = true);
-    await ref.read(subscriptionProvider.notifier).purchasePlan(_selectedPlan);
+    final success = await ref.read(subscriptionProvider.notifier).purchasePackage(_selectedPackage!);
     setState(() => _isLoading = false);
 
-    if (mounted) {
+    if (mounted && success) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('🎉 Pro\'ya hoş geldin! Tüm özellikler aktif.'),
         ),
       );
+    } else if (mounted && !success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Satın alma iptal edildi veya bir hata oluştu.'),
+        ),
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -130,33 +162,34 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Yıllık plan
-              PlanCard(
-                title: 'Yıllık',
-                price: '₺249,99 / yıl',
-                perMonth: '₺20,83 / ay',
-                badge: '%58 Tasarruf',
-                isSelected: _selectedPlan == SubscriptionPlan.yearly,
-                onTap: () => setState(() => _selectedPlan = SubscriptionPlan.yearly),
-              ),
-              const SizedBox(height: 12),
+              if (_isLoading && _offerings == null)
+                const Center(child: CircularProgressIndicator())
+              else if (_offerings?.current != null)
+                ..._offerings!.current!.availablePackages.map((package) {
+                  final isYearly = package.packageType == PackageType.annual;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: PlanCard(
+                      title: isYearly ? 'Yıllık' : 'Aylık',
+                      price: package.storeProduct.priceString,
+                      perMonth: null, // İsterseniz yıllık plan için aylık hesaplama ekleyebilirsiniz
+                      badge: isYearly ? 'Avantajlı' : null,
+                      isSelected: _selectedPackage?.identifier == package.identifier,
+                      onTap: () => setState(() => _selectedPackage = package),
+                    ),
+                  );
+                }),
+              
+              if (_offerings?.current == null && !_isLoading)
+                const Text('Şu an paketler yüklenemiyor. Lütfen daha sonra tekrar deneyin.', textAlign: TextAlign.center),
 
-              // Aylık plan
-              PlanCard(
-                title: 'Aylık',
-                price: '₺49,99 / ay',
-                perMonth: null,
-                badge: null,
-                isSelected: _selectedPlan == SubscriptionPlan.monthly,
-                onTap: () => setState(() => _selectedPlan = SubscriptionPlan.monthly),
-              ),
               const SizedBox(height: 28),
 
               // ── Satın al butonu ──
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: _isLoading ? null : _purchase,
+                  onPressed: (_isLoading || _selectedPackage == null) ? null : _purchase,
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -179,9 +212,9 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                           ),
                         )
                       : Text(
-                          _selectedPlan == SubscriptionPlan.yearly
-                              ? 'Yıllık Pro — ₺249,99'
-                              : 'Aylık Pro — ₺49,99',
+                          _selectedPackage != null
+                              ? 'Satın Al — ${_selectedPackage!.storeProduct.priceString}'
+                              : 'Plan Seçiniz',
                         ),
                 ),
               ),

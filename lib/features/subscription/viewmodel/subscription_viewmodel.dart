@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/data/models/subscription.dart';
 import 'package:gircik/features/subscription/repository/subscription_repository.dart';
+import 'package:gircik/core/services/revenue_cat_service.dart';
 
 class SubscriptionViewModel extends Notifier<Subscription> {
   late SubscriptionRepository _repository;
@@ -28,12 +29,21 @@ class SubscriptionViewModel extends Notifier<Subscription> {
     }
   }
 
-  Future<bool> purchasePlan(SubscriptionPlan plan) async {
+  Future<bool> purchasePackage(dynamic package) async {
+    // Note: Use dynamic to avoid importing purchases_flutter everywhere, or import it.
+    // In this implementation, we will assume pro_paywall_screen passes the package.
     try {
-      String planStr = plan == SubscriptionPlan.monthly ? 'monthly' : 'yearly';
-      final updatedSub = await _repository.purchase(planStr);
-      state = updatedSub;
-      return true;
+      final isPro = await RevenueCatService.purchasePackage(package);
+      if (isPro) {
+        // Optimistically update the state
+        state = state.copyWith(
+          plan: SubscriptionPlan.monthly, // Or yearly based on package
+        );
+        // Refresh from backend to sync
+        loadStatus();
+        return true;
+      }
+      return false;
     } catch (e) {
       return false;
     }
