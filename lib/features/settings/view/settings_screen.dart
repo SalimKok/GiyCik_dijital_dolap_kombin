@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:gircik/theme/theme_provider.dart';
 import 'package:gircik/features/subscription/viewmodel/subscription_viewmodel.dart';
@@ -178,11 +179,19 @@ class SettingsScreen extends ConsumerWidget {
           const SectionHeader(title: 'Hakkında'),
           SettingsCard(
             children: [
-              const SettingsTile(
-                icon: Icons.info_rounded,
-                iconColor: Colors.grey,
-                title: 'Uygulama Sürümü',
-                subtitle: 'GiyÇık v1.0.0',
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final versionText = snapshot.hasData 
+                      ? 'v${snapshot.data!.buildNumber}.0.0' 
+                      : 'Yükleniyor...';
+                  return SettingsTile(
+                    icon: Icons.info_rounded,
+                    iconColor: Colors.grey,
+                    title: 'Uygulama Sürümü',
+                    subtitle: 'GiyÇık $versionText',
+                  );
+                },
               ),
               const SettingsDivider(),
               SettingsTile(

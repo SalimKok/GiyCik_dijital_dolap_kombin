@@ -153,6 +153,11 @@ class _ProPaywallScreenState extends ConsumerState<ProPaywallScreen> {
                 title: 'Analitik ve İçgörüler',
                 subtitle: 'Gardırobuna dair detaylı istatistikler ve analizler',
               ),
+              const FeatureItem(
+                icon: Icons.flight_takeoff_rounded,
+                title: 'Seyahat Planlama Asistanı',
+                subtitle: 'Gideceğin yere ve hava durumuna göre valizini yapay zeka hazırlasın',
+              ),
               const SizedBox(height: 32),
 
               // ── Plan seçimi ──

@@ -4,6 +4,7 @@ import 'package:gircik/features/auth/view/register_screen.dart';
 import 'package:gircik/features/auth/view/forgot_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gircik/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -305,6 +306,25 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
                       ),
                     ],
                   ),
+                ),
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const SizedBox();
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Text(
+                          'v${snapshot.data!.buildNumber}.0.0',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

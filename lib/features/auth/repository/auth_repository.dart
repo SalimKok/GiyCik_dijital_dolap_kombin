@@ -22,7 +22,7 @@ class AuthRepository {
       await _apiClient.saveToken(token);
       return token;
     } catch (e) {
-      throw Exception('Giriş başarısız: \${_handleError(e)}');
+      throw Exception('Giriş başarısız: ${_handleError(e)}');
     }
   }
 
@@ -44,7 +44,7 @@ class AuthRepository {
       
       return user;
     } catch (e) {
-      throw Exception('Kayıt başarısız: \${_handleError(e)}');
+      throw Exception('Kayıt başarısız: ${_handleError(e)}');
     }
   }
 
@@ -53,7 +53,7 @@ class AuthRepository {
       final response = await _apiClient.client.get('/auth/me');
       return User.fromJson(response.data);
     } catch (e) {
-      throw Exception('Kullanıcı bilgileri alınamadı: \${_handleError(e)}');
+      throw Exception('Kullanıcı bilgileri alınamadı: ${_handleError(e)}');
     }
   }
 
