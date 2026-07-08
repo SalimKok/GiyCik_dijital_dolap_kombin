@@ -183,7 +183,7 @@ class SettingsScreen extends ConsumerWidget {
                 future: PackageInfo.fromPlatform(),
                 builder: (context, snapshot) {
                   final versionText = snapshot.hasData 
-                      ? 'v${snapshot.data!.buildNumber}.0.0' 
+                      ? 'v${snapshot.data!.version}' 
                       : 'Yükleniyor...';
                   return SettingsTile(
                     icon: Icons.info_rounded,

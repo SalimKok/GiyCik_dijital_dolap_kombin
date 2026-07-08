@@ -316,7 +316,7 @@ class _LoginBodyState extends ConsumerState<_LoginBody> {
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: Text(
-                          'v${snapshot.data!.buildNumber}.0.0',
+                          'v${snapshot.data!.version}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                             fontSize: 10,
