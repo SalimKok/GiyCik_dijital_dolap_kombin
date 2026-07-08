@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gircik/data/models/subscription.dart';
 import 'package:gircik/features/subscription/repository/subscription_repository.dart';
 import 'package:gircik/core/services/revenue_cat_service.dart';
+import 'package:flutter/foundation.dart';
 
 class SubscriptionViewModel extends Notifier<Subscription> {
   late SubscriptionRepository _repository;
@@ -25,7 +26,7 @@ class SubscriptionViewModel extends Notifier<Subscription> {
       final sub = await _repository.getStatus();
       state = sub;
     } catch (e) {
-      // Failed to load, keep default
+      debugPrint("Load status error: $e");
     }
   }
 
@@ -45,6 +46,7 @@ class SubscriptionViewModel extends Notifier<Subscription> {
       }
       return false;
     } catch (e) {
+      debugPrint("Purchase error: $e");
       return false;
     }
   }
@@ -54,6 +56,7 @@ class SubscriptionViewModel extends Notifier<Subscription> {
       final updatedSub = await _repository.cancel();
       state = updatedSub;
     } catch (e) {
+      debugPrint("Cancel sub error: $e");
     }
   }
 
@@ -62,6 +65,7 @@ class SubscriptionViewModel extends Notifier<Subscription> {
       final updatedSub = await _repository.incrementUsage(metric);
       state = updatedSub;
     } catch (e) {
+      debugPrint("Increment metric error: $e");
     }
   }
 

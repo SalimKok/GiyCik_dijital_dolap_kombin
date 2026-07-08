@@ -23,7 +23,7 @@ class ApiClient {
           try {
             final token = await _storage.read(key: ApiConstants.tokenKey);
             if (token != null && token.isNotEmpty) {
-              debugPrint("Token found in storage, adding to header: \${token.substring(0, 10)}...");
+              debugPrint("Token found in storage, adding to header.");
               options.headers['Authorization'] = 'Bearer $token';
             } else {
               debugPrint("No token found in storage for request to: \${options.path}");

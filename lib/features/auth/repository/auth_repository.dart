@@ -37,11 +37,11 @@ class AuthRepository {
         },
       );
       
-      final user = User.fromJson(response.data);
-      
       // Kayıt başarılı olduktan sonra otomatik giriş yapıp token'ı kaydet
       await login(email, password);
       
+      // Giriş sonrası güncel kullanıcı bilgisini al
+      final user = await getCurrentUser();
       return user;
     } catch (e) {
       throw Exception('Kayıt başarısız: ${_handleError(e)}');

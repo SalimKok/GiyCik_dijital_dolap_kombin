@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 
 class WeatherInfo {
@@ -38,7 +39,7 @@ class WeatherService {
           cityName = place.administrativeArea ?? place.locality ?? place.subAdministrativeArea ?? 'Mevcut Konum';
         }
       } catch (e) {
-        print('Geocoding Error: $e');
+        debugPrint('Geocoding Error: $e');
       }
       
       // 3. Open-Meteo API'den hava durumu çek (API KEY Gerektirmez)
@@ -62,7 +63,7 @@ class WeatherService {
       }
       throw Exception('Hava durumu verisi alınamadı');
     } catch (e) {
-      print('Weather Error: $e');
+      debugPrint('Weather Error: $e');
       // Hata durumunda güvenli bir mock veri dönelim
       return WeatherInfo(
         condition: 'Güneşli',

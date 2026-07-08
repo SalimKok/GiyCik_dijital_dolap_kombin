@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class RevenueCatService {
-  // TODO: RevenueCat panelinden alacağınız Google Play ve App Store API Key'lerinizi buraya yapıştırın.
-  static const String _appleApiKey = 'appl_YOUR_APPLE_API_KEY_HERE';
   static const String _googleApiKey = 'goog_rqqfScWMysqBdwuDIZqNLkJFZmP';
 
   // Aboneliğinizin RevenueCat'te oluşturduğunuz entitlement (yetki) id'si. Genelde "pro" veya "premium" yapılır.
@@ -13,13 +11,15 @@ class RevenueCatService {
   static Future<void> initialize() async {
     if (kIsWeb) return;
 
-    await Purchases.setLogLevel(LogLevel.debug);
+    if (kDebugMode) {
+      await Purchases.setLogLevel(LogLevel.debug);
+    } else {
+      await Purchases.setLogLevel(LogLevel.warn);
+    }
 
     PurchasesConfiguration? configuration;
     if (Platform.isAndroid) {
       configuration = PurchasesConfiguration(_googleApiKey);
-    } else if (Platform.isIOS) {
-      configuration = PurchasesConfiguration(_appleApiKey);
     }
 
     if (configuration != null) {
